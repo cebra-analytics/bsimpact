@@ -9,6 +9,7 @@
 #' the valuation or measures used, such as monetary values, other quantified
 #' values (e.g. national significance, distinctiveness), ranking (e.g. GISS) or
 #' classification (e.g. EICAT, SEICAT).
+#'
 #' @param species_name Invasive species, genus, or functional group name.
 #' @param species_type Type of invasive species. One of \code{"pest"},
 #'   \code{"weed"}, or \code{"disease"}.
