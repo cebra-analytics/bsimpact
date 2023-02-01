@@ -22,7 +22,7 @@ Region(x, ...)
 \method{Region}{`NULL`}(...)
 }
 \arguments{
-\item{x}{A \code{raster::RasterLayer} or \code{terra::SpatRaster} object
+\item{x}{A \code{terra::SpatRaster} or \code{raster::RasterLayer} object
 representing a grid-based spatial region (template). The spatial division
 of locations, patches, or sub-regions may also be defined via a data frame
 (or matrix) of location coordinates in longitude and latitude (WGS84) with

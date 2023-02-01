@@ -27,6 +27,7 @@
 #'     \item{\code{get_impact_incursion()}}{Get the transformed incursion (0-1)
 #'       values for calculating impacts.}
 #'   }
+#' @include Region.R
 #' @export
 Incursion <- function(x,
                       region = NULL,

@@ -4,7 +4,7 @@
 #' defined via a raster layer with active (non-NA) cells, or via a data
 #' frame specifying locations, patches, or sub-regions.
 #'
-#' @param x A \code{raster::RasterLayer} or \code{terra::SpatRaster} object
+#' @param x A \code{terra::SpatRaster} or \code{raster::RasterLayer} object
 #'   representing a grid-based spatial region (template). The spatial division
 #'   of locations, patches, or sub-regions may also be defined via a data frame
 #'   (or matrix) of location coordinates in longitude and latitude (WGS84) with

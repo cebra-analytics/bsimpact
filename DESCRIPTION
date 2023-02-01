@@ -18,3 +18,8 @@ Suggests:
     knitr,
     rmarkdown,
     testthat
+Collate: 
+    'Context.R'
+    'Region.R'
+    'Incursion.R'
+    'ImpactAnalysis.R'
