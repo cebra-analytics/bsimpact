@@ -11,7 +11,8 @@ Context(
   impact_types = c("ecological", "social", "economic"),
   impact_scope,
   valuation_type = c("monetary", "non-monetary", "ranking", "categorical"),
-  impact_measures,
+  impact_measures = "$",
+  mgmt_cost_unit = "$",
   ...
 )
 
@@ -21,7 +22,8 @@ Context(
   impact_types = c("ecological", "social", "economic"),
   impact_scope,
   valuation_type = c("monetary", "non-monetary", "ranking", "categorical"),
-  impact_measures,
+  impact_measures = "$",
+  mgmt_cost_unit = "$",
   ...
 )
 }
@@ -48,7 +50,11 @@ or non-monetary (quantitative) measures should specify the unit used (e.g.
 "$"). Ranking or categorical measures should specify a list of
 values/categories in ascending order (when applicable), such as GISS
 (0, 1, 2, 3, 4, 5) ranking, or EICAT/SEICAT ("MC", "MN", "MO", "MR", "MV")
-categories.}
+categories. Default is "$".}
+
+\item{mgmt_cost_unit}{The unit of measure for management costs (e.g. "$" or
+"hours"). This will typically be the same unit as \code{"impact_measures"}
+when the \code{"valuation_type"} is \code{"monetary"}. Default is "$".}
 
 \item{...}{Additional parameters.}
 }
@@ -68,6 +74,8 @@ measure impacts: "monetary", "non-monetary", "ranking",
 "categorical".}
 \item{\code{get_impact_measures()}}{Get the measures used to quantify or
 classify each impact aspect.}
+\item{\code{get_mgmt_cost_unit()}}{Get the unit of measure for
+management costs.}
 }
 }
 \description{

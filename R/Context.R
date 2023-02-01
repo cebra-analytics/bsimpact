@@ -27,7 +27,10 @@
 #'   "$"). Ranking or categorical measures should specify a list of
 #'   values/categories in ascending order (when applicable), such as GISS
 #'   (0, 1, 2, 3, 4, 5) ranking, or EICAT/SEICAT ("MC", "MN", "MO", "MR", "MV")
-#'   categories.
+#'   categories. Default is "$".
+#' @param mgmt_cost_unit The unit of measure for management costs (e.g. "$" or
+#'   "hours"). This will typically be the same unit as \code{"impact_measures"}
+#'   when the \code{"valuation_type"} is \code{"monetary"}. Default is "$".
 #' @param ... Additional parameters.
 #' @return A \code{Context} class object (list) containing functions for
 #'   accessing attributes:
@@ -44,6 +47,8 @@
 #'       "categorical".}
 #'     \item{\code{get_impact_measures()}}{Get the measures used to quantify or
 #'       classify each impact aspect.}
+#'     \item{\code{get_mgmt_cost_unit()}}{Get the unit of measure for
+#'       management costs.}
 #'   }
 #' @export
 Context <- function(species_name,
@@ -58,7 +63,8 @@ Context <- function(species_name,
                                        "non-monetary",
                                        "ranking",
                                        "categorical"),
-                    impact_measures, ...) {
+                    impact_measures = "$",
+                    mgmt_cost_unit = "$", ...) {
   UseMethod("Context")
 }
 
@@ -76,7 +82,8 @@ Context.default <- function(species_name,
                                                "non-monetary",
                                                "ranking",
                                                "categorical"),
-                            impact_measures, ...) {
+                            impact_measures = "$",
+                            mgmt_cost_unit = "$", ...) {
 
   # Match arguments to selections
   species_type <- match.arg(species_type)
@@ -114,6 +121,11 @@ Context.default <- function(species_name,
   # Get the measures used to quantify or classify each impact aspect
   self$get_impact_measures <- function() {
     return(impact_measures)
+  }
+
+  # Get the unit of measure for management costs
+  self$get_mgmt_cost_unit <- function() {
+    return(mgmt_cost_unit)
   }
 
   return(self)
