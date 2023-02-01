@@ -12,7 +12,7 @@ Context(
   impact_scope,
   valuation_type = c("monetary", "non-monetary", "ranking", "categorical"),
   impact_measures = "$",
-  mgmt_cost_unit = "$",
+  mgmt_cost_unit = c("$", "hours", "none", "user"),
   ...
 )
 
@@ -23,7 +23,7 @@ Context(
   impact_scope,
   valuation_type = c("monetary", "non-monetary", "ranking", "categorical"),
   impact_measures = "$",
-  mgmt_cost_unit = "$",
+  mgmt_cost_unit = c("$", "hours", "none", "user"),
   ...
 )
 }
@@ -52,9 +52,10 @@ values/categories in ascending order (when applicable), such as GISS
 (0, 1, 2, 3, 4, 5) ranking, or EICAT/SEICAT ("MC", "MN", "MO", "MR", "MV")
 categories. Default is "$".}
 
-\item{mgmt_cost_unit}{The unit of measure for management costs (e.g. "$" or
-"hours"). This will typically be the same unit as \code{"impact_measures"}
-when the \code{"valuation_type"} is \code{"monetary"}. Default is "$".}
+\item{mgmt_cost_unit}{The unit of measure for management costs. This will
+typically be the same unit as \code{"impact_measures"} when the
+\code{"valuation_type"} is \code{"monetary"}. One of \code{"$"} (default),
+\code{"hours"}, \code{"none"}, or user specified.}
 
 \item{...}{Additional parameters.}
 }

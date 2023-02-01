@@ -28,9 +28,10 @@
 #'   values/categories in ascending order (when applicable), such as GISS
 #'   (0, 1, 2, 3, 4, 5) ranking, or EICAT/SEICAT ("MC", "MN", "MO", "MR", "MV")
 #'   categories. Default is "$".
-#' @param mgmt_cost_unit The unit of measure for management costs (e.g. "$" or
-#'   "hours"). This will typically be the same unit as \code{"impact_measures"}
-#'   when the \code{"valuation_type"} is \code{"monetary"}. Default is "$".
+#' @param mgmt_cost_unit The unit of measure for management costs. This will
+#'   typically be the same unit as \code{"impact_measures"} when the
+#'   \code{"valuation_type"} is \code{"monetary"}. One of \code{"$"} (default),
+#'   \code{"hours"}, \code{"none"}, or user specified.
 #' @param ... Additional parameters.
 #' @return A \code{Context} class object (list) containing functions for
 #'   accessing attributes:
@@ -64,7 +65,10 @@ Context <- function(species_name,
                                        "ranking",
                                        "categorical"),
                     impact_measures = "$",
-                    mgmt_cost_unit = "$", ...) {
+                    mgmt_cost_unit = c("$",
+                                       "hours",
+                                       "none",
+                                       "user"), ...) {
   UseMethod("Context")
 }
 
@@ -83,12 +87,18 @@ Context.default <- function(species_name,
                                                "ranking",
                                                "categorical"),
                             impact_measures = "$",
-                            mgmt_cost_unit = "$", ...) {
+                            mgmt_cost_unit = c("$",
+                                               "hours",
+                                               "none",
+                                               "user"), ...) {
 
   # Match arguments to selections
   species_type <- match.arg(species_type)
   impact_types <- match.arg(impact_types, several.ok = TRUE)
   valuation_type <- match.arg(valuation_type)
+  if (!is.character(mgmt_cost_unit) || length(mgmt_cost_unit) > 1) {
+    mgmt_cost_unit <- match.arg(mgmt_cost_unit)
+  }
 
   # Create a class structure
   self <- structure(list(), class = "Context")
