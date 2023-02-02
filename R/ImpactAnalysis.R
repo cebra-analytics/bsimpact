@@ -97,9 +97,10 @@ ImpactAnalysis.Context <- function(context,
   # Check combine function
   if (is.character(combine_function)) {
     combine_function <- match.arg(combine_function)
-  } else if (!is.function(combine_function)) {
-    stop(paste("Combine function must be 'sum', 'max', or a user-defined",
-               "function."), call. = FALSE)
+  } else if (!is.function(combine_function) ||
+             length(formalArgs(combine_function)) != 1) {
+    stop(paste("Combine function must be 'sum', 'max', or user-defined with",
+               "form function(aspect_locations)."), call. = FALSE)
   }
 
   # Check mgmt_costs

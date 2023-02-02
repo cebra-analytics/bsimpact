@@ -40,8 +40,8 @@ test_that("initializes with parameters", {
                      "impact scope, and which are compatible with the defined",
                      "region."))
   expect_error(ImpactAnalysis(context, region, incursion, impact_layers, combine_function = 0),
-               paste("Combine function must be 'sum', 'max', or a",
-                     "user-defined function."))
+               paste("Combine function must be 'sum', 'max', or user-defined",
+                     "with form function(aspect_locations)."), fixed = TRUE)
   expect_silent(impact <- ImpactAnalysis(context, region, incursion,
                                          impact_layers))
   expect_is(impact, "ImpactAnalysis")
