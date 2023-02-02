@@ -39,7 +39,12 @@ test_that("initializes with parameters", {
                      "location vectors, named consistently with the context",
                      "impact scope, and which are compatible with the defined",
                      "region."))
-  expect_error(ImpactAnalysis(context, region, incursion, impact_layers, combine_function = 0),
+  expect_error(ImpactAnalysis(context, region, incursion, impact_layers,
+                              combine_function = 0),
+               paste("Combine function must be 'sum', 'max', or user-defined",
+                     "with form function(aspect_locations)."), fixed = TRUE)
+  expect_error(ImpactAnalysis(context, region, incursion, impact_layers,
+                              combine_function = function(a, b) 0),
                paste("Combine function must be 'sum', 'max', or user-defined",
                      "with form function(aspect_locations)."), fixed = TRUE)
   expect_silent(impact <- ImpactAnalysis(context, region, incursion,
