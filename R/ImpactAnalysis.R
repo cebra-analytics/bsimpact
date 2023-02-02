@@ -25,6 +25,10 @@
 #'   a list of vectors of values at each \code{region} location for each
 #'   \code{context} impact scope aspect, which is passed to the function.
 #'   The function should return a single vector of values for each location.
+#' @param mgmt_costs Optional spatial layer (\code{terra::SpatRaster} or
+#'   \code{raster::RasterLayer}) or vector of management costs at each
+#'   location specified by the \code{region}, measured in the unit specified
+#'   in the \code{context}. Default is \code{NULL}.
 #' @param ... Additional parameters.
 #' @return An \code{ImpactAnalysis} class object (list) containing functions
 #'   for calculating invasive species (likely) incursion impacts:
@@ -34,6 +38,8 @@
 #'     \item{\code{combined_impacts()}}{Combine (likely) incursion impacts
 #'       across aspects of the environment, society, and/or economy, to produce
 #'       an overall impact.}
+#'     \item{\code{incursion_mgmt_costs()}}{Calculate (likely) incursion
+#'       management costs (when specified).}
 #'   }
 #' @include Context.R
 #' @include Region.R
@@ -44,6 +50,7 @@ ImpactAnalysis <- function(context,
                            incursion,
                            impact_layers,
                            combine_function = c("sum", "max"),
+                           mgmt_costs = NULL,
                            class = character(), ...) {
   UseMethod("ImpactAnalysis")
 }
@@ -55,6 +62,7 @@ ImpactAnalysis.Context <- function(context,
                                    incursion,
                                    impact_layers,
                                    combine_function = c("sum", "max"),
+                                   mgmt_costs = NULL,
                                    class = character(), ...) {
 
   # Check region and incursion model objects
@@ -93,6 +101,19 @@ ImpactAnalysis.Context <- function(context,
                "function."), call. = FALSE)
   }
 
+  # Check mgmt_costs
+  if (!is.null(mgmt_costs) &&
+      (!(class(mgmt_costs) %in% c("SpatRaster", "RasterLayer") ||
+         is.numeric(mgmt_costs)) ||
+       !(class(mgmt_costs) %in% c("SpatRaster", "RasterLayer") &&
+         region$is_compatible(mgmt_costs)) ||
+       (is.numeric(mgmt_costs) &&
+        length(mgmt_costs) != region$get_locations()))) {
+    stop(paste("Management costs must be a spatial layer or location vector",
+               "compatible with the defined region."),
+         call. = FALSE)
+  }
+
   # Create a class structure
   self <- structure(list(), class = c(class, "ImpactAnalysis"))
 
@@ -104,6 +125,28 @@ ImpactAnalysis.Context <- function(context,
   # Combine (likely) impacts across aspects to produce an overall impact
   self$combined_impacts <- function() {
     # overridden in inherited classes
+  }
+
+  # Calculate (likely) incursion management costs (when specified)
+  if (!is.null(mgmt_costs)) {
+    self$incursion_mgmt_costs <- function() {
+
+      # Extract spatial raster management cost values
+      if (class(mgmt_costs) %in% c("SpatRaster", "RasterLayer")) {
+        mgmt_costs <- mgmt_costs[region$get_indices()][,1]
+      }
+
+      # Multiply by impact incursion values
+      if (region$get_type() == "grid") {
+        incursion_mgmt_costs <- region$get_template()
+        incursion_mgmt_costs[region$get_indices()] <-
+          mgmt_costs*incursion$get_impact_incursion()
+      } else {
+        incursion_mgmt_costs <-  mgmt_costs*incursion$get_impact_incursion()
+      }
+
+      return(incursion_mgmt_costs)
+    }
   }
 
   return(self)

@@ -11,6 +11,7 @@ ImpactAnalysis(
   incursion,
   impact_layers,
   combine_function = c("sum", "max"),
+  mgmt_costs = NULL,
   class = character(),
   ...
 )
@@ -21,6 +22,7 @@ ImpactAnalysis(
   incursion,
   impact_layers,
   combine_function = c("sum", "max"),
+  mgmt_costs = NULL,
   class = character(),
   ...
 )
@@ -51,6 +53,11 @@ a list of vectors of values at each \code{region} location for each
 \code{context} impact scope aspect, which is passed to the function.
 The function should return a single vector of values for each location.}
 
+\item{mgmt_costs}{Optional spatial layer (\code{terra::SpatRaster} or
+\code{raster::RasterLayer}) or vector of management costs at each
+location specified by the \code{region}, measured in the unit specified
+in the \code{context}. Default is \code{NULL}.}
+
 \item{...}{Additional parameters.}
 }
 \value{
@@ -62,6 +69,8 @@ for each aspect of the environment, society, and/or economy.}
 \item{\code{combined_impacts()}}{Combine (likely) incursion impacts
 across aspects of the environment, society, and/or economy, to produce
 an overall impact.}
+\item{\code{incursion_mgmt_costs()}}{Calculate (likely) incursion
+management costs (when specified).}
 }
 }
 \description{
