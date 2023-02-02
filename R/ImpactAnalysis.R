@@ -31,7 +31,8 @@
 #'   in the \code{context}. Default is \code{NULL}.
 #' @param ... Additional parameters.
 #' @return An \code{ImpactAnalysis} class object (list) containing functions
-#'   for calculating invasive species (likely) incursion impacts:
+#'   for calculating invasive species (likely) incursion impacts and management
+#'   costs (optional):
 #'   \describe{
 #'     \item{\code{incursion_impacts()}}{Calculate (likely) incursion impacts
 #'       for each aspect of the environment, society, and/or economy.}
@@ -51,7 +52,7 @@ ImpactAnalysis <- function(context,
                            impact_layers,
                            combine_function = c("sum", "max"),
                            mgmt_costs = NULL,
-                           class = character(), ...) {
+                           subclass = character(), ...) {
   UseMethod("ImpactAnalysis")
 }
 
@@ -63,7 +64,7 @@ ImpactAnalysis.Context <- function(context,
                                    impact_layers,
                                    combine_function = c("sum", "max"),
                                    mgmt_costs = NULL,
-                                   class = character(), ...) {
+                                   subclass = character(), ...) {
 
   # Check region and incursion model objects
   if (!inherits(region, "Region")) {
@@ -115,7 +116,7 @@ ImpactAnalysis.Context <- function(context,
   }
 
   # Create a class structure
-  self <- structure(list(), class = c(class, "ImpactAnalysis"))
+  self <- structure(list(), class = c(subclass, "ImpactAnalysis"))
 
   # Calculate (likely) incursion impacts for each aspect
   self$incursion_impacts <- function() {

@@ -2,8 +2,7 @@ context("ImpactAnalysis")
 
 test_that("initializes with parameters", {
   TEST_DIRECTORY <- test_path("test_inputs")
-  context <- Context("My species",
-                     impact_scope = c("aspect1", "aspect2"))
+  context <- Context("My species", impact_scope = c("aspect1", "aspect2"))
   template <- terra::rast(file.path(TEST_DIRECTORY, "greater_melb.tif"))
   template_alt <- terra::rast(file.path(TEST_DIRECTORY,
                                         "greater_melb_wgs84.tif"))
@@ -53,8 +52,7 @@ test_that("initializes with parameters", {
 
 test_that("calculates incursion management costs", {
   TEST_DIRECTORY <- test_path("test_inputs")
-  context <- Context("My species",
-                     impact_scope = c("aspect1", "aspect2"))
+  context <- Context("My species", impact_scope = c("aspect1", "aspect2"))
   template <- terra::rast(file.path(TEST_DIRECTORY, "greater_melb.tif"))
   template_alt <- terra::rast(file.path(TEST_DIRECTORY, "greater_melb_wgs84.tif"))
   region <- Region(template*0)

@@ -12,7 +12,7 @@ ImpactAnalysis(
   impact_layers,
   combine_function = c("sum", "max"),
   mgmt_costs = NULL,
-  class = character(),
+  subclass = character(),
   ...
 )
 
@@ -23,7 +23,7 @@ ImpactAnalysis(
   impact_layers,
   combine_function = c("sum", "max"),
   mgmt_costs = NULL,
-  class = character(),
+  subclass = character(),
   ...
 )
 }
@@ -62,7 +62,8 @@ in the \code{context}. Default is \code{NULL}.}
 }
 \value{
 An \code{ImpactAnalysis} class object (list) containing functions
-for calculating invasive species (likely) incursion impacts:
+for calculating invasive species (likely) incursion impacts and management
+costs (optional):
 \describe{
 \item{\code{incursion_impacts()}}{Calculate (likely) incursion impacts
 for each aspect of the environment, society, and/or economy.}

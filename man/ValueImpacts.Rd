@@ -11,8 +11,8 @@ ValueImpacts(
   incursion,
   impact_layers,
   loss_rates,
-  mgmt_costs = NULL,
   combine_function = "sum",
+  mgmt_costs = NULL,
   ...
 )
 
@@ -22,8 +22,8 @@ ValueImpacts(
   incursion,
   impact_layers,
   loss_rates,
-  mgmt_costs = NULL,
   combine_function = "sum",
+  mgmt_costs = NULL,
   ...
 )
 }
@@ -48,12 +48,6 @@ the impact scope in the \code{context}.}
 (mechanism, service, sector, asset type, etc.) specified via the impact
 scope in the \code{context}.}
 
-\item{mgmt_costs}{A spatial layer (\code{terra::SpatRaster} or
-\code{raster::RasterLayer}) or vector of management costs at each
-location (specified by the \code{region}). Only used when the
-\code{context} valuation type is \code{"monetary"}. Default is
-\code{NULL}.}
-
 \item{combine_function}{The function used to combine impact layers across
 aspects of the environment, society, and/or economy. Either \code{"sum"}
 or a user defined function having the form
@@ -62,12 +56,17 @@ a list of vectors of values at each \code{region} location for each
 \code{context} impact scope aspect, which is passed to the function.
 The function should return a single vector of values for each location.}
 
+\item{mgmt_costs}{Optional spatial layer (\code{terra::SpatRaster} or
+\code{raster::RasterLayer}) or vector of management costs at each
+location specified by the \code{region}, measured in the unit specified
+in the \code{context}. Default is \code{NULL}.}
+
 \item{...}{Additional parameters.}
 }
 \value{
-An \code{ValueImpacts} class object (list) containing functions
-for calculating invasive species (likely) incursion impacts and management
-costs (\code{context} valuation \code{"monetary"} type only):
+A \code{ValueImpacts} class object (list) containing functions
+for calculating invasive species (likely) incursion impacts, management
+costs (optional), and total costs (when applicable):
 \describe{
 \item{\code{incursion_impacts()}}{Calculate (likely) incursion impacts
 (damages or losses) for each aspect of the environment, society,
@@ -76,10 +75,10 @@ and/or economy.}
 across aspects of the environment, society, and/or economy, to produce
 an overall impact (damage or loss).}
 \item{\code{incursion_mgmt_costs()}}{Calculate (likely) incursion
-management costs (valuation \code{"monetary"} type only).}
+management costs (when specified).}
 \item{\code{total_costs()}}{Calculate (likely) total incursion
-(damages/losses plus management) costs (valuation \code{"monetary"}
-type only).}
+(damages/losses plus management) costs (when \code{context}
+\code{mgmt_cost_unit} matches \code{impact_measures}).}
 }
 }
 \description{
