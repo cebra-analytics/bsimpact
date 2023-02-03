@@ -19,8 +19,9 @@ Suggests:
     rmarkdown,
     testthat
 Collate: 
-    'Context.R'
     'Region.R'
     'Incursion.R'
+    'Context.R'
     'ImpactAnalysis.R'
+    'ClassImpacts.R'
     'ValueImpacts.R'
