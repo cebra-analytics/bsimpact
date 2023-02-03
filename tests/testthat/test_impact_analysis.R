@@ -8,7 +8,7 @@ test_that("initializes with parameters", {
                                         "greater_melb_wgs84.tif"))
   region <- Region(template*0)
   incursion <- Incursion(template, region)
-  impact_layers <- list(aspect1 = 2*template, aspect2 = 3*template)
+  impact_layers <- list(aspect1 = 100*template, aspect2 = 200*template)
   expect_error(ImpactAnalysis(context, region = 0, 0, 0),
                "Region model must be a 'Region' or inherited class object.")
   expect_error(ImpactAnalysis(context, region, incursion = 0, 0),
@@ -26,14 +26,14 @@ test_that("initializes with parameters", {
                      "impact scope, and which are compatible with the defined",
                      "region."))
   expect_error(ImpactAnalysis(context, region, incursion,
-                 impact_layers = list(aspect1 = 2*template,
+                 impact_layers = list(aspect1 = 100*template,
                                       aspect2 = template_alt)),
                paste("Impact layers must be a named list of spatial layers or",
                      "location vectors, named consistently with the context",
                      "impact scope, and which are compatible with the defined",
                      "region."))
   expect_error(ImpactAnalysis(context, region, incursion,
-                              impact_layers = list(aspect1 = 2*template,
+                              impact_layers = list(aspect1 = 100*template,
                                                    aspect2 = 1:10)),
                paste("Impact layers must be a named list of spatial layers or",
                      "location vectors, named consistently with the context",
@@ -62,7 +62,7 @@ test_that("calculates incursion management costs", {
   template_alt <- terra::rast(file.path(TEST_DIRECTORY, "greater_melb_wgs84.tif"))
   region <- Region(template*0)
   incursion <- Incursion(template, region)
-  impact_layers <- list(aspect1 = 2*template, aspect2 = 3*template)
+  impact_layers <- list(aspect1 = 100*template, aspect2 = 200*template)
   mgmt_costs = template*0 + 300
   expect_error(ImpactAnalysis(context, region, incursion, impact_layers,
                               mgmt_costs = list()),

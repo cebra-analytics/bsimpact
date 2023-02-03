@@ -121,9 +121,9 @@ ValueImpacts.Context <- function(context,
       }
 
       # Calculate incursion impacts
-      incursion_impacts <- list()
+      incursion_impacts <<- list()
       for (aspect in names(impact_layers)) {
-        incursion_impacts[[aspect]] <-
+        incursion_impacts[[aspect]] <<-
           impact_layers[[aspect]]*loss_rates[aspect]*impact_incursion
       }
 
@@ -133,7 +133,7 @@ ValueImpacts.Context <- function(context,
           incursion_impact_rast <- region$get_template()
           incursion_impact_rast[region$get_indices()] <-
             incursion_impacts[[aspect]]
-          incursion_impacts[[aspect]] <- incursion_impact_rast
+          incursion_impacts[[aspect]] <<- incursion_impact_rast
         }
       }
     }
@@ -141,10 +141,41 @@ ValueImpacts.Context <- function(context,
   }
 
   # Combine (likely) impacts across aspects to produce an overall impact
+  combined_impacts <- NULL
   self$combined_impacts <- function() { # overridden
-    # TODO ####
-    # overridden in inherited classes
-    0
+    if (is.null(combined_impacts)) {
+
+      # Get incursion impacts
+      incursion_impacts <- self$incursion_impacts()
+
+      # Extract spatial raster incursion impact layer values
+      for (i in 1:length(incursion_impacts)) {
+        if (class(incursion_impacts[[i]]) %in%
+            c("SpatRaster", "RasterLayer")) {
+          incursion_impacts[[i]] <-
+            incursion_impacts[[i]][region$get_indices()][,1]
+        }
+      }
+
+      # Combine incursion impacts
+      if (is.character(combine_function)) {
+        if (combine_function == "sum") {
+          combined_impacts <<- rowSums(as.data.frame(incursion_impacts))
+        } else if (combine_function == "max") {
+          combined_impacts <<- do.call(pmax, incursion_impacts)
+        }
+      } else if (is.function(combine_function)) {
+        combined_impacts <<- combine_function(incursion_impacts)
+      }
+
+      # Place in spatial raster when grid region
+      if (region$get_type() == "grid") {
+        combined_impacts_rast <- region$get_template()
+        combined_impacts_rast[region$get_indices()] <- combined_impacts
+        combined_impacts <<- combined_impacts_rast
+      }
+    }
+    return(combined_impacts)
   }
 
   # Calculate (likely) incursion management costs via super class
