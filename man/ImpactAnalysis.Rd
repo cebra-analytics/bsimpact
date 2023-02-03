@@ -69,9 +69,9 @@ costs (optional):
 for each aspect of the environment, society, and/or economy.}
 \item{\code{combined_impacts()}}{Combine (likely) incursion impacts
 across aspects of the environment, society, and/or economy, to produce
-an overall impact.}
+an overall impact at each location.}
 \item{\code{incursion_mgmt_costs()}}{Calculate (likely) incursion
-management costs (when specified).}
+management costs at each location (when specified).}
 }
 }
 \description{

@@ -33,20 +33,20 @@
 #'   in the \code{context}. Default is \code{NULL}.
 #' @param ... Additional parameters.
 #' @return A \code{ValueImpacts} class object (list) containing functions
-#'   for calculating invasive species (likely) incursion impacts, management
-#'   costs (optional), and total costs (when applicable):
+#'   for calculating and combining invasive species (likely) incursion impacts,
+#'   management costs (optional), and total costs (when applicable):
 #'   \describe{
 #'     \item{\code{incursion_impacts()}}{Calculate (likely) incursion impacts
 #'       (damages or losses) for each aspect of the environment, society,
 #'       and/or economy.}
 #'     \item{\code{combined_impacts()}}{Combine (likely) incursion impacts
 #'       across aspects of the environment, society, and/or economy, to produce
-#'       an overall impact (damage or loss).}
+#'       an overall impact (damage or loss) at each location.}
 #'     \item{\code{incursion_mgmt_costs()}}{Calculate (likely) incursion
-#'       management costs (when specified).}
+#'       management costs (when specified) at each location.}
 #'     \item{\code{total_costs()}}{Calculate (likely) total incursion
-#'       (damages/losses plus management) costs (when \code{context}
-#'       \code{mgmt_cost_unit} matches \code{impact_measures}).}
+#'       (damages/losses plus management) costs at each location (when
+#'       \code{context} \code{mgmt_cost_unit} matches \code{impact_measures}).}
 #'   }
 #' @include ImpactAnalysis.R
 #' @export
