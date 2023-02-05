@@ -27,7 +27,7 @@ test_that("initializes with parameters", {
                             loss_rates = c(a = 0.3, b = 0.4)),
                paste("Loss rates must be numeric, >= 0, <= 1, and named",
                      "consistently with the context impact scope."))
-  expect_warning(
+  expect_message(
     impacts <- ValueImpacts(context, region, incursion, impact_layers,
                             loss_rates = c(0.3, 0.4)),
     paste("Unnamed loss rates assumed to be in order consistent with the",

@@ -93,8 +93,8 @@ ValueImpacts.Context <- function(context,
   if (length(loss_rates) == length(context$get_impact_scope()) &&
       is.null(names(loss_rates))) {
     names(loss_rates) <- context$get_impact_scope()
-    warning(paste("Unnamed loss rates assumed to be in order consistent with",
-                  "the context impact scope."), call. = FALSE)
+    message(paste("Unnamed loss rates assumed to be in order consistent with",
+                  "the context impact scope."))
   }
   if (!is.numeric(loss_rates) || any(loss_rates < 0) || any(loss_rates > 1) ||
       (!is.null(names(loss_rates)) &&
