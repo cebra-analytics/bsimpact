@@ -18,6 +18,10 @@
 #'   the spatial distribution of each named aspect (mechanism, service, sector,
 #'   asset type, etc.) specified via the impact scope in the \code{context}.
 #'   Unknown layers/values for aspects may be omitted.
+#' @param impact_classes A vector of class (ranking or category) values
+#'   (consistent with the impact measures in the \code{context}) for each named
+#'   aspect (mechanism, service, sector, asset type, etc.) specified via the
+#'   impact scope in the \code{context}.
 #' @param combine_function The function used to combine impact layers across
 #'   aspects of the environment, society, and/or economy. Either \code{"max"},
 #'   (for maximum ordinal class), or a user defined function having the form
@@ -48,6 +52,7 @@ ClassImpacts <- function(context,
                          region,
                          incursion,
                          impact_layers,
+                         impact_classes,
                          combine_function = "max",
                          mgmt_costs = NULL, ...) {
   UseMethod("ClassImpacts")
@@ -59,6 +64,7 @@ ClassImpacts.Context <- function(context,
                                  region,
                                  incursion,
                                  impact_layers,
+                                 impact_classes,
                                  combine_function = "max",
                                  mgmt_costs = NULL, ...) {
 
@@ -79,42 +85,87 @@ ClassImpacts.Context <- function(context,
          call. = FALSE)
   }
 
-  #### TO HERE
+  # Check impact classes match context impact measures for each impact scope
+  if (length(impact_classes) == length(context$get_impact_scope()) &&
+      is.null(names(impact_classes))) {
+    names(impact_classes) <- context$get_impact_scope()
+    message(paste("Unnamed impact classes assumed to be in order consistent",
+                  "with the context impact scope."))
+  }
+  if (!all(impact_classes %in% context$get_impact_measures()) ||
+      (!is.null(names(impact_classes)) &&
+       !all(names(impact_classes) %in% context$get_impact_scope())) ||
+      (is.null(names(impact_classes)) &&
+       length(impact_classes) != length(context$get_impact_scope()))) {
+    stop(paste("Impact classes must match context impact measures and be",
+               "named consistently with the context impact scopes."),
+         call. = FALSE)
+  }
 
   # Calculate (likely) incursion impacts for each aspect
   incursion_impacts <- NULL
   self$incursion_impacts <- function() { # overridden
     if (is.null(incursion_impacts)) {
 
-      # Get impact incursion values
-      impact_incursion <- incursion$get_impact_incursion()
+      # Get binary impact incursion values
+      impact_incursion <- 1*(incursion$get_impact_incursion() > 0)
 
-      # Extract spatial raster impact layer values
-      for (i in 1:length(impact_layers)) {
-        if (class(impact_layers[[i]]) %in% c("SpatRaster", "RasterLayer")) {
-          impact_layers[[i]] <- impact_layers[[i]][region$get_indices()][,1]
+      # Extract/create spatial raster impact layers for each classified aspect
+      for (a in names(impact_classes)) { #
+        if (class(impact_layers[[a]]) %in% c("SpatRaster", "RasterLayer")) {
+          impact_layers[[a]] <-
+            1*(impact_layers[[a]][region$get_indices()][,1] > 0)
+        } else if (is.null(impact_layers[[a]])) {
+          impact_layers[[a]] <- rep(1, region$get_locations())
         }
       }
 
       # Calculate incursion impacts
       incursion_impacts <<- list()
-      for (aspect in names(impact_layers)) {
-        incursion_impacts[[aspect]] <<-
-          impact_layers[[aspect]]*loss_rates[aspect]*impact_incursion
+      for (a in names(impact_layers)) {
+        if (context$get_valuation_type() == "ranking" &&
+            is.numeric(context$get_impact_measures())) { # numeric ranking
+          impact_class_i <- impact_classes[a]
+        } else { # character ranking/categorical
+          impact_class_i <- which(context$get_impact_measures() ==
+                                    impact_classes[a])
+        }
+        incursion_impacts[[a]] <<-
+          impact_layers[[a]]*impact_class_i*impact_incursion
       }
 
       # Place in spatial rasters when grid region
       if (region$get_type() == "grid") {
-        for (aspect in names(impact_layers)) {
+        for (a in names(incursion_impacts)) {
           incursion_impact_rast <- region$get_template()
-          incursion_impact_rast[region$get_indices()] <-
-            incursion_impacts[[aspect]]
-          incursion_impacts[[aspect]] <<- incursion_impact_rast
+          incursion_impact_rast[region$get_indices()] <- incursion_impacts[[a]]
+          incursion_impacts[[a]] <<- incursion_impact_rast
+        }
+      }
+
+      # Substitute categories
+      if (context$get_valuation_type() == "categorical" ||
+          !is.numeric(context$get_impact_measures())) {
+        if (region$get_type() == "grid") {
+          for (a in names(incursion_impacts)) {
+            levels(incursion_impacts[[a]]) <<-
+              data.frame(ID = 0:length(context$get_impact_measures()),
+                         category = c("N/A", context$get_impact_measures()))
+          }
+        } else {
+          for (a in names(incursion_impacts)) {
+            zero_idx <- which(incursion_impacts[[a]] == 0)
+            incursion_impacts[[a]][zero_idx] <<- "N/A"
+            incursion_impacts[[a]][-zero_idx] <<-
+              context$get_impact_measures()[incursion_impacts[[a]][-zero_idx]]
+          }
         }
       }
     }
     return(incursion_impacts)
   }
+
+  #### TO HERE
 
   # Combine (likely) impacts across aspects to produce an overall impact
   combined_impacts <- NULL
@@ -135,10 +186,15 @@ ClassImpacts.Context <- function(context,
 
       # Combine incursion impacts
       if (is.character(combine_function)) {
-        if (combine_function == "sum") {
-          combined_impacts <<- rowSums(as.data.frame(incursion_impacts))
-        } else if (combine_function == "max") {
-          combined_impacts <<- do.call(pmax, incursion_impacts)
+        if (context$get_valuation_type() == "ranking" &&
+            is.numeric(context$get_impact_measures())) { # numeric ranking
+          if (combine_function == "sum") {
+            combined_impacts <<- rowSums(as.data.frame(incursion_impacts))
+          } else if (combine_function == "max") {
+            combined_impacts <<- do.call(pmax, incursion_impacts)
+          }
+        } else { # character ranking/categorical
+          # TODO ####
         }
       } else if (is.function(combine_function)) {
         combined_impacts <<- combine_function(incursion_impacts)

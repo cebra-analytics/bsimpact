@@ -10,6 +10,7 @@ ClassImpacts(
   region,
   incursion,
   impact_layers,
+  impact_classes,
   combine_function = "max",
   mgmt_costs = NULL,
   ...
@@ -20,6 +21,7 @@ ClassImpacts(
   region,
   incursion,
   impact_layers,
+  impact_classes,
   combine_function = "max",
   mgmt_costs = NULL,
   ...
@@ -42,6 +44,11 @@ of locations (consistent with the spatial \code{region}), for indicating
 the spatial distribution of each named aspect (mechanism, service, sector,
 asset type, etc.) specified via the impact scope in the \code{context}.
 Unknown layers/values for aspects may be omitted.}
+
+\item{impact_classes}{A vector of class (ranking or category) values
+(consistent with the impact measures in the \code{context}) for each named
+aspect (mechanism, service, sector, asset type, etc.) specified via the
+impact scope in the \code{context}.}
 
 \item{combine_function}{The function used to combine impact layers across
 aspects of the environment, society, and/or economy. Either \code{"max"},
