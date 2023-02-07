@@ -130,13 +130,12 @@ ValueImpacts.Context <- function(context,
       # Place in spatial rasters when grid region
       if (region$get_type() == "grid") {
         for (aspect in names(impact_layers)) {
-          incursion_impact_rast <- region$get_template()
-          incursion_impact_rast[region$get_indices()] <-
-            incursion_impacts[[aspect]]
-          incursion_impacts[[aspect]] <<- incursion_impact_rast
+          incursion_impacts[[aspect]] <<-
+            region$get_rast(incursion_impacts[[aspect]])
         }
       }
     }
+
     return(incursion_impacts)
   }
 
@@ -170,11 +169,10 @@ ValueImpacts.Context <- function(context,
 
       # Place in spatial raster when grid region
       if (region$get_type() == "grid") {
-        combined_impacts_rast <- region$get_template()
-        combined_impacts_rast[region$get_indices()] <- combined_impacts
-        combined_impacts <<- combined_impacts_rast
+        combined_impacts <<- region$get_rast(combined_impacts)
       }
     }
+
     return(combined_impacts)
   }
 

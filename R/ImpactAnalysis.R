@@ -140,9 +140,8 @@ ImpactAnalysis.Context <- function(context,
 
       # Multiply by impact incursion values
       if (region$get_type() == "grid") {
-        incursion_mgmt_costs <- region$get_template()
-        incursion_mgmt_costs[region$get_indices()] <-
-          mgmt_costs*incursion$get_impact_incursion()
+        incursion_mgmt_costs <-
+          region$get_rast(mgmt_costs*incursion$get_impact_incursion())
       } else {
         incursion_mgmt_costs <-  mgmt_costs*incursion$get_impact_incursion()
       }

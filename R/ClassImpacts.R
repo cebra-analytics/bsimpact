@@ -154,15 +154,7 @@ ClassImpacts.Context <- function(context,
       # Place in spatial rasters when grid region
       if (region$get_type() == "grid") {
         for (a in names(incursion_impacts)) {
-          incursion_impact_rast <- region$get_template()
-          if (context$get_valuation_type() == "categorical" ||
-              !is.numeric(context$get_impact_measures())) {
-            levels(incursion_impact_rast) <-
-              data.frame(ID = 1:length(context$get_impact_measures()),
-                         category = context$get_impact_measures())
-          }
-          incursion_impact_rast[region$get_indices()] <- incursion_impacts[[a]]
-          incursion_impacts[[a]] <<- incursion_impact_rast
+          incursion_impacts[[a]] <<- region$get_rast(incursion_impacts[[a]])
         }
       }
     }
@@ -205,17 +197,10 @@ ClassImpacts.Context <- function(context,
 
       # Place in spatial raster when grid region
       if (region$get_type() == "grid") {
-        combined_impacts_rast <- region$get_template()
-        if (context$get_valuation_type() == "categorical" ||
-            !is.numeric(context$get_impact_measures())) {
-          levels(combined_impacts_rast) <-
-            data.frame(ID = 1:length(context$get_impact_measures()),
-                       category = context$get_impact_measures())
-        }
-        combined_impacts_rast[region$get_indices()] <- combined_impacts
-        combined_impacts <<- combined_impacts_rast
+        combined_impacts <<- region$get_rast(combined_impacts)
       }
     }
+
     return(combined_impacts)
   }
 
