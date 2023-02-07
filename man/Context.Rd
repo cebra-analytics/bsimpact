@@ -49,8 +49,9 @@ classify each impact aspect, consistent with the valuation type. Monetary
 or non-monetary (quantitative) measures should specify the unit used (e.g.
 "$"). Ranking or categorical measures should specify a list of
 values/categories in ascending order (when applicable), such as GISS
-(0, 1, 2, 3, 4, 5) ranking, or EICAT/SEICAT ("MC", "MN", "MO", "MR", "MV")
-categories. Default is "$".}
+(0, 1, 2, 3, 4, 5) ranking, or EICAT/SEICAT ("-", "MC", "MN", "MO", "MR",
+"MV") categories, where the first ranking/category represents the value or
+symbol for no impact or invasive species presence. Default is "$".}
 
 \item{mgmt_cost_unit}{The unit of measure for management costs. This will
 typically be the same unit as \code{"impact_measures"} when the
