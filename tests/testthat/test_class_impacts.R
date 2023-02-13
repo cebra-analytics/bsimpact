@@ -127,6 +127,7 @@ test_that("calculates incursion management costs", {
   incursion <- Incursion(template, region)
   impact_layers <- list(aspect1 = 1*(template > 0.1 & template < 0.3),
                         aspect2 = 1*(template > 0.2 & template < 0.4))
+  impact_locations <- (impact_layers$aspect1 > 0 | impact_layers$aspect2 > 0)
   mgmt_costs = template*0 + 300
   expect_silent(
     impacts <- ClassImpacts(context, region, incursion, impact_layers,
@@ -134,7 +135,8 @@ test_that("calculates incursion management costs", {
   expect_named(impacts, c("incursion_impacts", "combined_impacts",
                           "incursion_mgmt_costs"))
   expected_incursion_mgmt_costs <-
-    mgmt_costs[region$get_indices()][,1]*incursion$get_impact_incursion()
+    ((mgmt_costs*impact_locations)[region$get_indices()][,1]*
+        incursion$get_impact_incursion())
   expect_silent(incursion_mgmt_costs <- impacts$incursion_mgmt_costs())
   expect_is(incursion_mgmt_costs, "SpatRaster")
   expect_equal(incursion_mgmt_costs[region$get_indices()][,1],

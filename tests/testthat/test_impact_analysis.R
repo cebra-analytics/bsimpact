@@ -8,7 +8,8 @@ test_that("initializes with parameters", {
                                         "greater_melb_wgs84.tif"))
   region <- Region(template*0)
   incursion <- Incursion(template, region)
-  impact_layers <- list(aspect1 = 100*template, aspect2 = 200*template)
+  impact_layers <- list(aspect1 = 1*(template > 0.1 & template < 0.3),
+                        aspect2 = 1*(template > 0.2 & template < 0.4))
   expect_error(ImpactAnalysis(context, region = 0, 0, 0),
                "Region model must be a 'Region' or inherited class object.")
   expect_error(ImpactAnalysis(context, region, incursion = 0, 0),
@@ -62,7 +63,9 @@ test_that("calculates incursion management costs", {
   template_alt <- terra::rast(file.path(TEST_DIRECTORY, "greater_melb_wgs84.tif"))
   region <- Region(template*0)
   incursion <- Incursion(template, region)
-  impact_layers <- list(aspect1 = 100*template, aspect2 = 200*template)
+  impact_layers <- list(aspect1 = 1*(template > 0.1 & template < 0.3),
+                        aspect2 = 1*(template > 0.2 & template < 0.4))
+  impact_locations <- (impact_layers$aspect1 > 0 | impact_layers$aspect2 > 0)
   mgmt_costs = template*0 + 300
   expect_error(ImpactAnalysis(context, region, incursion, impact_layers,
                               mgmt_costs = list()),
@@ -80,7 +83,7 @@ test_that("calculates incursion management costs", {
     context, region, incursion, impact_layers, mgmt_costs = mgmt_costs))
   expect_named(impact, c("incursion_impacts", "combined_impacts",
                          "incursion_mgmt_costs"))
-  expected_values <- (mgmt_costs[region$get_indices()][,1]*
+  expected_values <- ((mgmt_costs*impact_locations)[region$get_indices()][,1]*
                         incursion$get_impact_incursion())
   expect_silent(incursion_mgmt_costs <- impact$incursion_mgmt_costs())
   expect_is(incursion_mgmt_costs, "SpatRaster")

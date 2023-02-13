@@ -141,8 +141,7 @@ ImpactAnalysis.Context <- function(context,
       # Multiply by impact incursion values at impact locations
       if (region$get_type() == "grid") {
         incursion_mgmt_costs <-
-          (region$get_rast(mgmt_costs*incursion$get_impact_incursion())*
-             impact_locations)
+          region$get_rast(mgmt_costs*incursion$get_impact_incursion())
         impact_locations <- region$get_template()
       } else {
         incursion_mgmt_costs <-  mgmt_costs*incursion$get_impact_incursion()
@@ -152,7 +151,6 @@ ImpactAnalysis.Context <- function(context,
         impact_locations <- impact_locations | impact_layer
       }
       incursion_mgmt_costs <- incursion_mgmt_costs*impact_locations
-      # TODO update tests ####
 
       return(incursion_mgmt_costs)
     }
