@@ -29,6 +29,7 @@
 #'   a list of vectors of the class at each \code{region} location for each
 #'   \code{context} impact scope aspect, which is passed to the function.
 #'   The function should return a single vector of classes for each location.
+#'   Set to \code{"none"} when combining impacts is not applicable.
 #' @param mgmt_costs Optional spatial layer (\code{terra::SpatRaster} or
 #'   \code{raster::RasterLayer}) or vector of management costs at each
 #'   location specified by the \code{region}, measured in the unit specified
@@ -53,7 +54,7 @@ ClassImpacts <- function(context,
                          incursion,
                          impact_layers,
                          impact_classes,
-                         combine_function = "max",
+                         combine_function = c("max", "none"),
                          mgmt_costs = NULL, ...) {
   UseMethod("ClassImpacts")
 }
@@ -65,7 +66,7 @@ ClassImpacts.Context <- function(context,
                                  incursion,
                                  impact_layers,
                                  impact_classes,
-                                 combine_function = "max",
+                                 combine_function = c("max", "none"),
                                  mgmt_costs = NULL, ...) {
 
   # Match combine function
@@ -164,44 +165,46 @@ ClassImpacts.Context <- function(context,
 
   # Combine (likely) impacts across aspects to produce an overall impact
   combined_impacts <- NULL
-  self$combined_impacts <- function() { # overridden
-    if (is.null(combined_impacts)) {
+  if (!is.character(combine_function) || combine_function != "none") {
+    self$combined_impacts <- function() { # overridden
+      if (is.null(combined_impacts)) {
 
-      # Get incursion impacts
-      incursion_impacts <- self$incursion_impacts()
+        # Get incursion impacts
+        incursion_impacts <- self$incursion_impacts()
 
-      # Extract spatial raster incursion impact layer values
-      for (i in 1:length(incursion_impacts)) {
-        if (class(incursion_impacts[[i]]) %in%
-            c("SpatRaster", "RasterLayer")) {
-          incursion_impacts[[i]] <-
-            incursion_impacts[[i]][region$get_indices()][,1]
+        # Extract spatial raster incursion impact layer values
+        for (i in 1:length(incursion_impacts)) {
+          if (class(incursion_impacts[[i]]) %in%
+              c("SpatRaster", "RasterLayer")) {
+            incursion_impacts[[i]] <-
+              incursion_impacts[[i]][region$get_indices()][,1]
+          }
         }
-      }
 
-      # Combine incursion impacts
-      if (is.character(combine_function) && combine_function == "max") {
-        if (context$get_valuation_type() == "ranking" &&
-            is.numeric(context$get_impact_measures())) { # numeric ranking
+        # Combine incursion impacts
+        if (is.character(combine_function) && combine_function == "max") {
+          if (context$get_valuation_type() == "ranking" &&
+              is.numeric(context$get_impact_measures())) { # numeric ranking
             combined_impacts <<- do.call(pmax, incursion_impacts)
-        } else { # character ranking/categorical
-          combined_impacts <<- do.call(pmax,
-                                       lapply(incursion_impacts, as.numeric))
-          combined_impacts <<-
-            factor(context$get_impact_measures()[combined_impacts],
-                   context$get_impact_measures())
+          } else { # character ranking/categorical
+            combined_impacts <<- do.call(pmax,
+                                         lapply(incursion_impacts, as.numeric))
+            combined_impacts <<-
+              factor(context$get_impact_measures()[combined_impacts],
+                     context$get_impact_measures())
+          }
+        } else if (is.function(combine_function)) {
+          combined_impacts <<- combine_function(incursion_impacts)
         }
-      } else if (is.function(combine_function)) {
-        combined_impacts <<- combine_function(incursion_impacts)
+
+        # Place in spatial raster when grid region
+        if (region$get_type() == "grid") {
+          combined_impacts <<- region$get_rast(combined_impacts)
+        }
       }
 
-      # Place in spatial raster when grid region
-      if (region$get_type() == "grid") {
-        combined_impacts <<- region$get_rast(combined_impacts)
-      }
+      return(combined_impacts)
     }
-
-    return(combined_impacts)
   }
 
   # Calculate (likely) incursion management costs via super class

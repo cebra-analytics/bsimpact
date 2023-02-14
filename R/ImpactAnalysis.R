@@ -25,6 +25,7 @@
 #'   a list of vectors of values at each \code{region} location for each
 #'   \code{context} impact scope aspect, which is passed to the function.
 #'   The function should return a single vector of values for each location.
+#'   Set to \code{"none"} when combining impacts is not applicable.
 #' @param mgmt_costs Optional spatial layer (\code{terra::SpatRaster} or
 #'   \code{raster::RasterLayer}) or vector of management costs at each
 #'   location specified by the \code{region}, measured in the unit specified
@@ -50,7 +51,7 @@ ImpactAnalysis <- function(context,
                            region,
                            incursion,
                            impact_layers,
-                           combine_function = c("sum", "max"),
+                           combine_function = c("sum", "max", "none"),
                            mgmt_costs = NULL,
                            subclass = character(), ...) {
   UseMethod("ImpactAnalysis")
@@ -62,7 +63,7 @@ ImpactAnalysis.Context <- function(context,
                                    region,
                                    incursion,
                                    impact_layers,
-                                   combine_function = c("sum", "max"),
+                                   combine_function = c("sum", "max", "none"),
                                    mgmt_costs = NULL,
                                    subclass = character(), ...) {
 
@@ -99,8 +100,9 @@ ImpactAnalysis.Context <- function(context,
     combine_function <- match.arg(combine_function)
   } else if (!is.function(combine_function) ||
              length(formalArgs(combine_function)) != 1) {
-    stop(paste("Combine function must be 'sum', 'max', or user-defined with",
-               "form function(aspect_locations)."), call. = FALSE)
+    stop(paste("Combine function must be 'sum', 'max', 'none', or a",
+               "user-defined with form function(aspect_locations)."),
+         call. = FALSE)
   }
 
   # Check mgmt_costs
@@ -125,8 +127,10 @@ ImpactAnalysis.Context <- function(context,
   }
 
   # Combine (likely) impacts across aspects to produce an overall impact
-  self$combined_impacts <- function() {
-    # overridden in inherited classes
+  if (!is.character(combine_function) || combine_function != "none") {
+    self$combined_impacts <- function() {
+      # overridden in inherited classes
+    }
   }
 
   # Calculate (likely) incursion management costs (when specified)

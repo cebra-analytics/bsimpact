@@ -8,8 +8,8 @@ test_that("initializes with parameters", {
   template <- terra::rast(file.path(TEST_DIRECTORY, "greater_melb.tif"))
   region <- Region(template*0)
   incursion <- Incursion(template, region)
-  impact_layers <- list(aspect1 = 1*(template > 0.1 & template < 0.3),
-                        aspect2 = 1*(template > 0.2 & template < 0.4))
+  impact_layers <- list(aspect1 = 100*(template > 0.1 & template < 0.3),
+                        aspect2 = 200*(template > 0.2 & template < 0.4))
   loss_rates = c(aspect1 = 0.3, aspect2 = 0.4)
   expect_error(ValueImpacts(context_alt, region, incursion, impact_layers,
                             loss_rates),
@@ -39,6 +39,10 @@ test_that("initializes with parameters", {
   expect_is(impacts, "ValueImpacts")
   expect_s3_class(impacts, "ImpactAnalysis")
   expect_named(impacts, c("incursion_impacts", "combined_impacts"))
+  expect_silent(impacts <- ValueImpacts(context, region, incursion,
+                                        impact_layers, loss_rates = loss_rates,
+                                        combine_function = "none"))
+  expect_named(impacts, c("incursion_impacts"))
 })
 
 test_that("calculates individual and combined incursion impacts", {
@@ -47,8 +51,8 @@ test_that("calculates individual and combined incursion impacts", {
   template <- terra::rast(file.path(TEST_DIRECTORY, "greater_melb.tif"))
   region <- Region(template*0)
   incursion <- Incursion(template, region)
-  impact_layers <- list(aspect1 = 1*(template > 0.1 & template < 0.3),
-                        aspect2 = 1*(template > 0.2 & template < 0.4))
+  impact_layers <- list(aspect1 = 100*(template > 0.1 & template < 0.3),
+                        aspect2 = 200*(template > 0.2 & template < 0.4))
   loss_rates = c(aspect1 = 0.3, aspect2 = 0.4)
   expect_silent(
     impacts <- ValueImpacts(context, region, incursion, impact_layers,
@@ -84,8 +88,8 @@ test_that("calculates incursion management and total costs", {
   template <- terra::rast(file.path(TEST_DIRECTORY, "greater_melb.tif"))
   region <- Region(template*0)
   incursion <- Incursion(template, region)
-  impact_layers <- list(aspect1 = 1*(template > 0.1 & template < 0.3),
-                        aspect2 = 1*(template > 0.2 & template < 0.4))
+  impact_layers <- list(aspect1 = 100*(template > 0.1 & template < 0.3),
+                        aspect2 = 200*(template > 0.2 & template < 0.4))
   impact_locations <- (impact_layers$aspect1 > 0 | impact_layers$aspect2 > 0)
   loss_rates = c(aspect1 = 0.3, aspect2 = 0.4)
   mgmt_costs = template*0 + 300
@@ -93,7 +97,7 @@ test_that("calculates incursion management and total costs", {
     impacts <- ValueImpacts(context, region, incursion, impact_layers,
                             loss_rates = loss_rates, mgmt_costs = mgmt_costs))
   expect_named(impacts, c("incursion_impacts", "combined_impacts",
-                          "incursion_mgmt_costs", "total_costs" ))
+                          "incursion_mgmt_costs", "total_costs"))
   expected_incursion_mgmt_costs <-
     ((mgmt_costs*impact_locations)[region$get_indices()][,1]*
        incursion$get_impact_incursion())
@@ -103,6 +107,27 @@ test_that("calculates incursion management and total costs", {
                expected_incursion_mgmt_costs)
   expected_total_costs <-
     (impacts$combined_impacts()[region$get_indices()][,1] +
+       expected_incursion_mgmt_costs)
+  expect_silent(total_costs <- impacts$total_costs())
+  expect_is(total_costs, "SpatRaster")
+  expect_equal(total_costs[region$get_indices()][,1], expected_total_costs)
+  expect_silent(impacts <- ValueImpacts(context, region, incursion,
+                                        impact_layers, loss_rates = loss_rates,
+                                        mgmt_costs = mgmt_costs,
+                                        combine_function = "none"))
+  expect_named(impacts, c("incursion_impacts", "incursion_mgmt_costs"))
+  expect_silent(impacts <- ValueImpacts(context, region, incursion,
+                                        impact_layers[1],
+                                        loss_rates = loss_rates[1],
+                                        mgmt_costs = mgmt_costs,
+                                        combine_function = "none"))
+  expect_named(impacts, c("incursion_impacts", "incursion_mgmt_costs",
+                          "total_costs"))
+  expected_incursion_mgmt_costs <-
+    ((mgmt_costs*(impact_layers$aspect1 > 0))[region$get_indices()][,1]*
+       incursion$get_impact_incursion())
+  expected_total_costs <-
+    (impacts$incursion_impacts()[[1]][region$get_indices()][,1] +
        expected_incursion_mgmt_costs)
   expect_silent(total_costs <- impacts$total_costs())
   expect_is(total_costs, "SpatRaster")

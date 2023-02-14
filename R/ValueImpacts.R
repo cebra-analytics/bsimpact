@@ -27,6 +27,7 @@
 #'   a list of vectors of values at each \code{region} location for each
 #'   \code{context} impact scope aspect, which is passed to the function.
 #'   The function should return a single vector of values for each location.
+#'   Set to \code{"none"} when combining impacts is not applicable.
 #' @param mgmt_costs Optional spatial layer (\code{terra::SpatRaster} or
 #'   \code{raster::RasterLayer}) or vector of management costs at each
 #'   location specified by the \code{region}, measured in the unit specified
@@ -55,7 +56,7 @@ ValueImpacts <- function(context,
                          incursion,
                          impact_layers,
                          loss_rates,
-                         combine_function = "sum",
+                         combine_function = c("sum", "none"),
                          mgmt_costs = NULL, ...) {
   UseMethod("ValueImpacts")
 }
@@ -67,8 +68,13 @@ ValueImpacts.Context <- function(context,
                                  incursion,
                                  impact_layers,
                                  loss_rates,
-                                 combine_function = "sum",
+                                 combine_function = c("sum", "none"),
                                  mgmt_costs = NULL, ...) {
+
+  # Match combine function
+  if (is.character(combine_function)) {
+    combine_function <- match.arg(combine_function)
+  }
 
   # Build via base class (for checks)
   self <- ImpactAnalysis(context = context,
@@ -141,39 +147,41 @@ ValueImpacts.Context <- function(context,
 
   # Combine (likely) impacts across aspects to produce an overall impact
   combined_impacts <- NULL
-  self$combined_impacts <- function() { # overridden
-    if (is.null(combined_impacts)) {
+  if (!is.character(combine_function) || combine_function != "none") {
+    self$combined_impacts <- function() { # overridden
+      if (is.null(combined_impacts)) {
 
-      # Get incursion impacts
-      incursion_impacts <- self$incursion_impacts()
+        # Get incursion impacts
+        incursion_impacts <- self$incursion_impacts()
 
-      # Extract spatial raster incursion impact layer values
-      for (i in 1:length(incursion_impacts)) {
-        if (class(incursion_impacts[[i]]) %in%
-            c("SpatRaster", "RasterLayer")) {
-          incursion_impacts[[i]] <-
-            incursion_impacts[[i]][region$get_indices()][,1]
+        # Extract spatial raster incursion impact layer values
+        for (i in 1:length(incursion_impacts)) {
+          if (class(incursion_impacts[[i]]) %in%
+              c("SpatRaster", "RasterLayer")) {
+            incursion_impacts[[i]] <-
+              incursion_impacts[[i]][region$get_indices()][,1]
+          }
+        }
+
+        # Combine incursion impacts
+        if (is.character(combine_function)) {
+          if (combine_function == "sum") {
+            combined_impacts <<- rowSums(as.data.frame(incursion_impacts))
+          } else if (combine_function == "max") {
+            combined_impacts <<- do.call(pmax, incursion_impacts)
+          }
+        } else if (is.function(combine_function)) {
+          combined_impacts <<- combine_function(incursion_impacts)
+        }
+
+        # Place in spatial raster when grid region
+        if (region$get_type() == "grid") {
+          combined_impacts <<- region$get_rast(combined_impacts)
         }
       }
 
-      # Combine incursion impacts
-      if (is.character(combine_function)) {
-        if (combine_function == "sum") {
-          combined_impacts <<- rowSums(as.data.frame(incursion_impacts))
-        } else if (combine_function == "max") {
-          combined_impacts <<- do.call(pmax, incursion_impacts)
-        }
-      } else if (is.function(combine_function)) {
-        combined_impacts <<- combine_function(incursion_impacts)
-      }
-
-      # Place in spatial raster when grid region
-      if (region$get_type() == "grid") {
-        combined_impacts <<- region$get_rast(combined_impacts)
-      }
+      return(combined_impacts)
     }
-
-    return(combined_impacts)
   }
 
   # Calculate (likely) incursion management costs via super class
@@ -190,9 +198,14 @@ ValueImpacts.Context <- function(context,
 
   # Calculate (likely) total incursion (damages/losses plus management) costs
   if (!is.null(mgmt_costs) &&
+      (is.function(self$combined_impacts) || length(impact_layers) == 1) &&
       all(context$get_mgmt_cost_unit() == context$get_impact_measures())) {
     self$total_costs <- function() {
-      return(self$combined_impacts() + self$incursion_mgmt_costs())
+      if (length(impact_layers) == 1) {
+        return(self$incursion_impacts()[[1]] + self$incursion_mgmt_costs())
+      } else {
+        return(self$combined_impacts() + self$incursion_mgmt_costs())
+      }
     }
   }
 

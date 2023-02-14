@@ -11,7 +11,7 @@ ClassImpacts(
   incursion,
   impact_layers,
   impact_classes,
-  combine_function = "max",
+  combine_function = c("max", "none"),
   mgmt_costs = NULL,
   ...
 )
@@ -22,7 +22,7 @@ ClassImpacts(
   incursion,
   impact_layers,
   impact_classes,
-  combine_function = "max",
+  combine_function = c("max", "none"),
   mgmt_costs = NULL,
   ...
 )
@@ -56,7 +56,8 @@ aspects of the environment, society, and/or economy. Either \code{"max"},
 \code{"function(aspect_locations)"}, where \code{aspect_locations} is
 a list of vectors of the class at each \code{region} location for each
 \code{context} impact scope aspect, which is passed to the function.
-The function should return a single vector of classes for each location.}
+The function should return a single vector of classes for each location.
+Set to \code{"none"} when combining impacts is not applicable.}
 
 \item{mgmt_costs}{Optional spatial layer (\code{terra::SpatRaster} or
 \code{raster::RasterLayer}) or vector of management costs at each

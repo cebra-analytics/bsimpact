@@ -25,7 +25,8 @@ test_that("initializes with parameters", {
                             impact_classes = c(a = 3, b = 2)),
                paste("Impact classes must match context impact measures and",
                      "be named consistently with the context impact scopes."))
-  expect_error(ClassImpacts(context, region, incursion, impact_layers, impact_classes = c(aspect1 = 6, aspect2 = 2)),
+  expect_error(ClassImpacts(context, region, incursion, impact_layers,
+                            impact_classes = c(aspect1 = 6, aspect2 = 2)),
                paste("Impact classes must match context impact measures and",
                      "be named consistently with the context impact scopes."))
   expect_message(
@@ -37,6 +38,15 @@ test_that("initializes with parameters", {
                                         impact_layers, impact_classes))
   expect_is(impacts, "ClassImpacts")
   expect_s3_class(impacts, "ImpactAnalysis")
+  expect_named(impacts, c("incursion_impacts", "combined_impacts"))
+
+  expect_silent(impacts <- ClassImpacts(context, region, incursion,
+                                        impact_layers, impact_classes,
+                                        combine_function = "none"))
+  expect_named(impacts, c("incursion_impacts"))
+  expect_silent(impacts <- ClassImpacts(context, region, incursion,
+                                        impact_layers, impact_classes,
+                                        combine_function = function(x) x))
   expect_named(impacts, c("incursion_impacts", "combined_impacts"))
 })
 
