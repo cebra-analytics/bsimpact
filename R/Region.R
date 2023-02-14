@@ -11,7 +11,7 @@
 #'   explicitly named columns "lon" and "lat". If missing, the region is
 #'   assumed to be a single aspatial patch.
 #' @param ... Additional parameters.
-#' @return A \code{Divisions} class object (list) containing functions for
+#' @return A \code{Region} class object (list) containing functions for
 #'   accessing attributes, checking compatibility of objects with the
 #'   region, and to maintain and calculate spatial data:
 #'   \describe{

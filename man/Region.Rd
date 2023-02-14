@@ -32,7 +32,7 @@ assumed to be a single aspatial patch.}
 \item{...}{Additional parameters.}
 }
 \value{
-A \code{Divisions} class object (list) containing functions for
+A \code{Region} class object (list) containing functions for
 accessing attributes, checking compatibility of objects with the
 region, and to maintain and calculate spatial data:
 \describe{
