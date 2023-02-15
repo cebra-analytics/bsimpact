@@ -109,8 +109,8 @@ ImpactAnalysis.Context <- function(context,
   if (!is.null(mgmt_costs) &&
       (!(class(mgmt_costs) %in% c("SpatRaster", "RasterLayer") ||
          is.numeric(mgmt_costs)) ||
-       !(class(mgmt_costs) %in% c("SpatRaster", "RasterLayer") &&
-         region$is_compatible(mgmt_costs)) ||
+       (class(mgmt_costs) %in% c("SpatRaster", "RasterLayer") &&
+         !region$is_compatible(mgmt_costs)) ||
        (is.numeric(mgmt_costs) &&
         length(mgmt_costs) != region$get_locations()))) {
     stop(paste("Management costs must be a spatial layer or location vector",
