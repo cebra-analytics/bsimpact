@@ -47,6 +47,47 @@
 #'     \item{\code{incursion_mgmt_costs()}}{Calculate (likely) incursion
 #'       management costs at each location (when specified).}
 #'   }
+#' @references
+#'   ABARES 2021, The National Priority List of Exotic Environmental Pests,
+#'   Weeds and Diseases: Information Paper (Version 2.0), ABARES report to
+#'   client prepared for the Chief Environmental Biosecurity Officer,
+#'   Department of Agriculture, Water and the Environment, Canberra, ACT. CC
+#'   BY 4.0.
+#'   \url{https://www.agriculture.gov.au/sites/default/files/documents/eepl-information-paper.pdf}
+#'
+#'   Bacher, S., Blackburn, T. M., Essl, F., Genovesi, P., Heikkilä, J.,
+#'   Jeschke, J. M., Jones, G., Keller, R., Kenis, M., Kueffer, C.,
+#'   Martinou, A. F., Nentwig, W., Pergl, J., Pyšek, P., Rabitsch, W.,
+#'   Richardson, D. M., Roy, H. E., Saul, W-C., Scalera, R., Vilà, M.,
+#'   Wilson, J. R. U., Kumschick, S. (2018). Socio-economic impact
+#'   classification of alien taxa (SEICAT).
+#'   \emph{Methods in Ecology and Evolution}, 9(1), 159–168.
+#'   \doi{10.1111/2041-210X.12844}
+#'
+#'   Blackburn, T. M., Essl, F., Evans, T., Hulme, P. E., Jeschke, J. M.,
+#'   Kühn, I., Kumschick, S., Marková, Z., Mrugała, A., Nentwig, W., Pergl, J.,
+#'   Pyšek, P., Rabitsch, W., Ricciardi, A., Richardson, D. M., Sendek, A.,
+#'   Vilà, M., Wilson, J. R. U., Winter, M., Genovesi, P., & Bacher, S. (2014).
+#'   A Unified Classification of Alien Species Based on the Magnitude of their
+#'   Environmental Impacts. \emph{PLoS Biology}, 12(5).
+#'   \doi{10.1371/journal.pbio.1001850}
+#'
+#'   Ireland, K. B., van Klinken, R., Cook, D. C., Jamieson, L., Hulme, P. E.,
+#'   Worner, S., Rodoni, B., Teulon, D., Crampton, K. A., Hodda, M., Paini, D.,
+#'   Logan, D., Tyson, J. L., Brockerhoff, E. G., Fletcher, J. D.,
+#'   Christopher, M., Ludowici, V. A., & Bulman, L. (2020). Plant Pest Impact
+#'   Metric System (PPIMS): Framework and guidelines for a common set of
+#'   metrics to classify and prioritise plant pests. \emph{Crop Protection},
+#'   128. \doi{10.1016/j.cropro.2019.105003}
+#'
+#'   IUCN (2020). IUCN EICAT Categories and Criteria. The Environmental Impact
+#'   Classification for Alien Taxa (EICAT) First edition.
+#'   \emph{IUCN, Gland, Switzerland and Cambridge, UK}. IUCN.
+#'   \doi{10.2305/IUCN.CH.2020.05.en}
+#'
+#'   Nentwig, W., Kühnel, E., & Bacher, S. (2010). A Generic Impact-Scoring
+#'   System Applied to Alien Mammals in Europe. \emph{Conservation Biology},
+#'   24(1), 302–311. \doi{10.1111/j.1523-1739.2009.01289.x}
 #' @include ImpactAnalysis.R
 #' @export
 ClassImpacts <- function(context,

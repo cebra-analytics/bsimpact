@@ -52,6 +52,32 @@
 #'     \item{\code{get_mgmt_cost_unit()}}{Get the unit of measure for
 #'       management costs.}
 #'   }
+#' @references
+#'   Bacher, S., Blackburn, T. M., Essl, F., Genovesi, P., Heikkilä, J.,
+#'   Jeschke, J. M., Jones, G., Keller, R., Kenis, M., Kueffer, C.,
+#'   Martinou, A. F., Nentwig, W., Pergl, J., Pyšek, P., Rabitsch, W.,
+#'   Richardson, D. M., Roy, H. E., Saul, W-C., Scalera, R., Vilà, M.,
+#'   Wilson, J. R. U., Kumschick, S. (2018). Socio-economic impact
+#'   classification of alien taxa (SEICAT).
+#'   \emph{Methods in Ecology and Evolution}, 9(1), 159–168.
+#'   \doi{10.1111/2041-210X.12844}
+#'
+#'   Blackburn, T. M., Essl, F., Evans, T., Hulme, P. E., Jeschke, J. M.,
+#'   Kühn, I., Kumschick, S., Marková, Z., Mrugała, A., Nentwig, W., Pergl, J.,
+#'   Pyšek, P., Rabitsch, W., Ricciardi, A., Richardson, D. M., Sendek, A.,
+#'   Vilà, M., Wilson, J. R. U., Winter, M., Genovesi, P., & Bacher, S. (2014).
+#'   A Unified Classification of Alien Species Based on the Magnitude of their
+#'   Environmental Impacts. \emph{PLoS Biology}, 12(5).
+#'   \doi{10.1371/journal.pbio.1001850}
+#'
+#'   IUCN (2020). IUCN EICAT Categories and Criteria. The Environmental Impact
+#'   Classification for Alien Taxa (EICAT) First edition.
+#'   \emph{IUCN, Gland, Switzerland and Cambridge, UK}. IUCN.
+#'   \doi{10.2305/IUCN.CH.2020.05.en}
+#'
+#'   Nentwig, W., Kühnel, E., & Bacher, S. (2010). A Generic Impact-Scoring
+#'   System Applied to Alien Mammals in Europe. \emph{Conservation Biology},
+#'   24(1), 302–311. \doi{10.1111/j.1523-1739.2009.01289.x}
 #' @export
 Context <- function(species_name,
                     species_type = c("pest",
@@ -100,6 +126,9 @@ Context.default <- function(species_name,
   if (!is.character(mgmt_cost_unit) || length(mgmt_cost_unit) > 1) {
     mgmt_cost_unit <- match.arg(mgmt_cost_unit)
   }
+
+  # Ensure impact scope/aspects are strings
+  impact_scope <- as.character(impact_scope)
 
   # Create a class structure
   self <- structure(list(), class = "Context")
