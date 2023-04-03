@@ -80,6 +80,12 @@ management costs (when specified) at each location.}
 \item{\code{total_costs()}}{Calculate (likely) total incursion
 (damages/losses plus management) costs at each location (when
 \code{context} \code{mgmt_cost_unit} matches \code{impact_measures}).}
+\item{\code{save_analysis(...)}}{Save the impact analysis as a
+collection of raster TIF and/or comma-separated value (CSV) files,
+appropriate for the \code{region} type, including the individual and
+combined incursion impacts, and incursion management and total costs
+(when specified).\code{Terra} raster write options may be passed to
+the function for saving grid-based analysis outputs.}
 }
 }
 \description{

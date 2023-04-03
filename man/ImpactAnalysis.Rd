@@ -73,6 +73,12 @@ across aspects of the environment, society, and/or economy, to produce
 an overall impact at each location.}
 \item{\code{incursion_mgmt_costs()}}{Calculate (likely) incursion
 management costs at each location (when specified).}
+\item{\code{save_analysis(...)}}{Save the impact analysis as a
+collection of raster TIF and/or comma-separated value (CSV) files,
+appropriate for the \code{region} type, including the individual and
+combined incursion impacts, and incursion management costs (when
+specified).\code{Terra} raster write options may be passed to the
+function for saving grid-based analysis outputs.}
 }
 }
 \description{

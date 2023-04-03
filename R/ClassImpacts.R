@@ -46,6 +46,12 @@
 #'       an overall impact class at each location.}
 #'     \item{\code{incursion_mgmt_costs()}}{Calculate (likely) incursion
 #'       management costs at each location (when specified).}
+#'     \item{\code{save_analysis(...)}}{Save the impact analysis as a
+#'       collection of raster TIF and/or comma-separated value (CSV) files,
+#'       appropriate for the \code{region} type, including the individual and
+#'       combined incursion impacts, and incursion management costs (when
+#'       specified).\code{Terra} raster write options may be passed to the
+#'       function for saving grid-based analysis outputs.}
 #'   }
 #' @references
 #'   ABARES 2021, The National Priority List of Exotic Environmental Pests,
@@ -257,6 +263,67 @@ ClassImpacts.Context <- function(context,
         incursion_mgmt_costs <<- super$incursion_mgmt_costs()
       }
       return(incursion_mgmt_costs)
+    }
+  }
+
+  # Save the impact analysis as a collection of appropriate files
+  self$save_analysis <- function(...) {
+
+    # Save individual incursion impacts
+    incursion_impacts <- self$incursion_impacts()
+    if (region$get_type() == "grid") {
+      for (aspect in names(incursion_impacts)) {
+        terra::writeRaster(incursion_impacts[[aspect]],
+                           filename = sprintf("incursion_impacts_%s.tif",
+                                              aspect), ...)
+      }
+    } else if (region$get_type() == "patch") {
+      names(incursion_impacts) <- paste0(names(incursion_impacts), "_impact")
+      analysis_data <- cbind(region$get_coords(extra_cols = TRUE),
+                             incursion_impacts)
+    }
+
+    # Save combined incursion impacts
+    if (!is.null(self$combined_impacts)) {
+      combined_impacts <- self$combined_impacts()
+      if (!is.null(combined_impacts)) {
+        if (region$get_type() == "grid") {
+          terra::writeRaster(combined_impacts,
+                             filename = "combined_impacts.tif", ...)
+        } else if (region$get_type() == "patch") {
+          analysis_data$combined_impact <- combined_impacts
+        }
+      }
+    }
+
+    # Save incursion management costs
+    if (!is.null(self$incursion_mgmt_costs)) {
+      incursion_mgmt_costs <- self$incursion_mgmt_costs()
+      if (!is.null(incursion_mgmt_costs)) {
+        if (region$get_type() == "grid") {
+          terra::writeRaster(incursion_mgmt_costs,
+                             filename = "incursion_mgmt_costs.tif", ...)
+        } else if (region$get_type() == "patch") {
+          analysis_data$incursion_mgmt_cost <- incursion_mgmt_costs
+        }
+      }
+    }
+
+    # Save total incursion costs
+    if (!is.null(self$total_costs)) {
+      total_costs <- self$total_costs()
+      if (!is.null(total_costs)) {
+        if (region$get_type() == "grid") {
+          terra::writeRaster(total_costs, filename = "total_costs.tif", ...)
+        }
+      } else if (region$get_type() == "patch") {
+        analysis_data$total_cost <- total_costs
+      }
+    }
+
+    # Save analysis data when patch/single to CSV file
+    if (region$get_type() %in% c("patch", "single")) {
+      write.csv(analysis_data, "impact_analysis.csv", row.names = FALSE)
     }
   }
 
