@@ -287,6 +287,9 @@ ValueImpacts.Context <- function(context,
       names(incursion_impacts) <- paste0(names(incursion_impacts), "_impact")
       analysis_data <- cbind(region$get_coords(extra_cols = TRUE),
                              incursion_impacts)
+    } else if (region$get_type() == "single") {
+      names(incursion_impacts) <- paste0(names(incursion_impacts), "_impact")
+      analysis_data <- as.data.frame(incursion_impacts)
     }
 
     # Save combined incursion impacts
@@ -296,7 +299,7 @@ ValueImpacts.Context <- function(context,
         if (region$get_type() == "grid") {
           terra::writeRaster(combined_impacts,
                              filename = "combined_impacts.tif", ...)
-        } else if (region$get_type() == "patch") {
+        } else if (region$get_type() %in% c("patch", "single")) {
           analysis_data$combined_impact <- combined_impacts
         }
       }
@@ -309,7 +312,7 @@ ValueImpacts.Context <- function(context,
         if (region$get_type() == "grid") {
           terra::writeRaster(incursion_mgmt_costs,
                              filename = "incursion_mgmt_costs.tif", ...)
-        } else if (region$get_type() == "patch") {
+        } else if (region$get_type() %in% c("patch", "single")) {
           analysis_data$incursion_mgmt_cost <- incursion_mgmt_costs
         }
       }
@@ -322,7 +325,7 @@ ValueImpacts.Context <- function(context,
         if (region$get_type() == "grid") {
           terra::writeRaster(total_costs, filename = "total_costs.tif", ...)
         }
-      } else if (region$get_type() == "patch") {
+      } else if (region$get_type() %in% c("patch", "single")) {
         analysis_data$total_cost <- total_costs
       }
     }
