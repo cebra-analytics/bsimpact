@@ -34,3 +34,18 @@ test_that("transforms incursion values via multiplier and threshold", {
   expected_x[which(expected_x > 1)] <- 1
   expect_equal(incursion$get_impact_incursion(), expected_x)
 })
+
+test_that("sets incursion values", {
+  TEST_DIRECTORY <- test_path("test_inputs")
+  template <- terra::rast(file.path(TEST_DIRECTORY, "greater_melb.tif"))
+  region <- Region(template*0)
+  expect_silent(incursion <- Incursion(template, region))
+  original_x <- template[][,1][region$get_indices()]
+  expect_error(incursion$set_values(1:10),
+               paste("The length of the incursion values must be equal to the",
+                     "number of region locations."))
+  expect_error(incursion$set_values(-1*original_x),
+               "The incursion values must be >= 0.")
+  expect_silent(incursion$set_values(0.8*original_x))
+  expect_equal(incursion$get_impact_incursion(), 0.8*original_x)
+})

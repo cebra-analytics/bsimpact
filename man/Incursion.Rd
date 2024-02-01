@@ -58,6 +58,8 @@ accessing incursion type and transformed incursion values:
 \item{\code{get_type()}}{Get the incursion type.}
 \item{\code{get_impact_incursion()}}{Get the transformed incursion (0-1)
 values for calculating impacts.}
+\item{\code{set_values(values)}}{Set the incursion values via a numeric
+vector.}
 }
 }
 \description{

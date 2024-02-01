@@ -26,6 +26,8 @@
 #'     \item{\code{get_type()}}{Get the incursion type.}
 #'     \item{\code{get_impact_incursion()}}{Get the transformed incursion (0-1)
 #'       values for calculating impacts.}
+#'     \item{\code{set_values(values)}}{Set the incursion values via a numeric
+#'       vector.}
 #'   }
 #' @include Region.R
 #' @export
@@ -126,6 +128,21 @@ Incursion.default <- function(x,
     x[which(x > 1)] <- 1
 
     return(x)
+  }
+
+  # Set the incursion values
+  self$set_values <- function(values) {
+
+    # Check values
+    if (!is.null(region) && length(values) != region$get_locations()) {
+      stop(paste("The length of the incursion values must be equal to the",
+                 "number of region locations."), call. = FALSE)
+    }
+    if (min(values) < 0) {
+      stop("The incursion values must be >= 0.", call. = FALSE)
+    }
+
+    x <<- values
   }
 
   return(self)

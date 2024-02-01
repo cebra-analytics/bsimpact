@@ -39,6 +39,7 @@
 #'   for classifying and combining invasive species (likely) incursion impacts,
 #'   and management costs (optional):
 #'   \describe{
+#'     \item{\code{get_incursion()}}{Get incursion object.}
 #'     \item{\code{incursion_impacts()}}{Classify (likely) incursion impacts
 #'       for each aspect of the environment, society, and/or economy.}
 #'     \item{\code{combined_impacts()}}{Combine (likely) incursion impacts
