@@ -141,6 +141,9 @@ Incursion.default <- function(x,
     if (min(values) < 0) {
       stop("The incursion values must be >= 0.", call. = FALSE)
     }
+    if (type == "prob" && max(values) > 1) {
+      stop("The incursion probability values must be <= 1.", call. = FALSE)
+    }
 
     x <<- values
   }
