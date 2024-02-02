@@ -70,12 +70,14 @@ for calculating and combining invasive species (likely) incursion impacts,
 management costs (optional), and total costs (when applicable):
 \describe{
 \item{\code{get_incursion()}}{Get incursion object.}
-\item{\code{incursion_impacts()}}{Calculate (likely) incursion impacts
-(damages or losses) for each aspect of the environment, society,
-and/or economy.}
-\item{\code{combined_impacts()}}{Combine (likely) incursion impacts
-across aspects of the environment, society, and/or economy, to produce
-an overall impact (damage or loss) at each location.}
+\item{\code{incursion_impacts(raw = FALSE)}}{Calculate (likely)
+incursion impacts (damages or losses) for each aspect of the
+environment, society, and/or economy. Returns results consistent with
+region, or vectors when \code{raw = TRUE}.}
+\item{\code{combined_impacts(raw = FALSE)}}{Combine (likely) incursion
+impacts across aspects of the environment, society, and/or economy, to
+produce an overall impact (damage or loss) at each location. Returns
+result consistent with region, or a vector when \code{raw = TRUE}.}
 \item{\code{incursion_mgmt_costs()}}{Calculate (likely) incursion
 management costs (when specified) at each location.}
 \item{\code{total_costs()}}{Calculate (likely) total incursion

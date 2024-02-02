@@ -75,6 +75,16 @@ test_that("calculates individual and combined incursion impacts", {
   expect_is(combined_impacts, "SpatRaster")
   expect_equal(combined_impacts[region$get_indices()][,1],
                expected_combined_impacts)
+  expect_silent(
+    impacts <- ValueImpacts(context, region, incursion, impact_layers,
+                            loss_rates = loss_rates))
+  expect_silent(incursion_impacts <- impacts$incursion_impacts(raw = TRUE))
+  expect_equal(sapply(incursion_impacts, class),
+               c(aspect1 = "numeric", aspect2 = "numeric"))
+  expect_equal(incursion_impacts, expected_impacts)
+  expect_silent(combined_impacts <- impacts$combined_impacts(raw = TRUE))
+  expect_is(combined_impacts, "numeric")
+  expect_equal(combined_impacts, expected_combined_impacts)
   expect_silent(impacts <- ValueImpacts(
     context, region, incursion, impact_layers, loss_rates = loss_rates,
     combine_function = function(l) rowMeans(as.data.frame(l))))

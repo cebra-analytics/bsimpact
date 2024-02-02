@@ -38,12 +38,14 @@
 #'   management costs (optional), and total costs (when applicable):
 #'   \describe{
 #'     \item{\code{get_incursion()}}{Get incursion object.}
-#'     \item{\code{incursion_impacts()}}{Calculate (likely) incursion impacts
-#'       (damages or losses) for each aspect of the environment, society,
-#'       and/or economy.}
-#'     \item{\code{combined_impacts()}}{Combine (likely) incursion impacts
-#'       across aspects of the environment, society, and/or economy, to produce
-#'       an overall impact (damage or loss) at each location.}
+#'     \item{\code{incursion_impacts(raw = FALSE)}}{Calculate (likely)
+#'       incursion impacts (damages or losses) for each aspect of the
+#'       environment, society, and/or economy. Returns results consistent with
+#'       region, or vectors when \code{raw = TRUE}.}
+#'     \item{\code{combined_impacts(raw = FALSE)}}{Combine (likely) incursion
+#'       impacts across aspects of the environment, society, and/or economy, to
+#'       produce an overall impact (damage or loss) at each location. Returns
+#'       result consistent with region, or a vector when \code{raw = TRUE}.}
 #'     \item{\code{incursion_mgmt_costs()}}{Calculate (likely) incursion
 #'       management costs (when specified) at each location.}
 #'     \item{\code{total_costs()}}{Calculate (likely) total incursion
@@ -177,7 +179,7 @@ ValueImpacts.Context <- function(context,
 
   # Calculate (likely) incursion impacts for each aspect
   incursion_impacts <- NULL
-  self$incursion_impacts <- function() { # overridden
+  self$incursion_impacts <- function(raw = FALSE) { # overridden
     if (is.null(incursion_impacts)) {
 
       # Get impact incursion values
@@ -198,7 +200,7 @@ ValueImpacts.Context <- function(context,
       }
 
       # Place in spatial rasters when grid region
-      if (region$get_type() == "grid") {
+      if (region$get_type() == "grid" && !raw) {
         for (aspect in names(impact_layers)) {
           incursion_impacts[[aspect]] <<-
             region$get_rast(incursion_impacts[[aspect]])
@@ -212,11 +214,11 @@ ValueImpacts.Context <- function(context,
   # Combine (likely) impacts across aspects to produce an overall impact
   combined_impacts <- NULL
   if (!is.character(combine_function) || combine_function != "none") {
-    self$combined_impacts <- function() { # overridden
+    self$combined_impacts <- function(raw = FALSE) { # overridden
       if (is.null(combined_impacts)) {
 
         # Get incursion impacts
-        incursion_impacts <- self$incursion_impacts()
+        incursion_impacts <- self$incursion_impacts(raw = raw)
 
         # Extract spatial raster incursion impact layer values
         for (i in 1:length(incursion_impacts)) {
@@ -239,7 +241,7 @@ ValueImpacts.Context <- function(context,
         }
 
         # Place in spatial raster when grid region
-        if (region$get_type() == "grid") {
+        if (region$get_type() == "grid" && !raw) {
           combined_impacts <<- region$get_rast(combined_impacts)
         }
       }

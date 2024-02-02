@@ -82,6 +82,15 @@ test_that("classifies individual and combines ranking incursion impacts", {
   expect_is(combined_impacts, "SpatRaster")
   expect_equal(combined_impacts[region$get_indices()][,1],
                expected_combined_impacts)
+  expect_silent(impacts <- ClassImpacts(context, region, incursion,
+                                        impact_layers, impact_classes))
+  expect_silent(incursion_impacts <- impacts$incursion_impacts(raw = TRUE))
+  expect_equal(sapply(incursion_impacts, class),
+               c(aspect1 = "numeric", aspect2 = "numeric"))
+  expect_equal(incursion_impacts, expected_impacts)
+  expect_silent(combined_impacts <- impacts$combined_impacts(raw = TRUE))
+  expect_is(combined_impacts, "numeric")
+  expect_equal(combined_impacts, expected_combined_impacts)
 })
 
 test_that("classifies individual and combines categorical incursion impacts", {
@@ -129,6 +138,20 @@ test_that("classifies individual and combines categorical incursion impacts", {
   expect_equal(terra::cats(combined_impacts)[[1]], cat_df)
   expect_equal(combined_impacts[region$get_indices()][,1],
                expected_combined_impacts)
+  expect_silent(impacts <- ClassImpacts(context, region, incursion,
+                                        impact_layers, impact_classes))
+  expect_silent(incursion_impacts <- impacts$incursion_impacts(raw = TRUE))
+  expect_equal(sapply(incursion_impacts, class),
+               c(aspect1 = "factor", aspect2 = "factor", aspect3 = "factor"))
+  cat_vect <- context$get_impact_measures()
+  expect_equal(lapply(incursion_impacts, levels),
+               list(aspect1 = cat_vect, aspect2 = cat_vect,
+                    aspect3 = cat_vect))
+  expect_equal(incursion_impacts, expected_impacts)
+  expect_silent(combined_impacts <- impacts$combined_impacts(raw = TRUE))
+  expect_is(combined_impacts, "factor")
+  expect_equal(levels(combined_impacts), cat_vect)
+  expect_equal(combined_impacts, expected_combined_impacts)
 })
 
 test_that("calculates incursion management costs", {

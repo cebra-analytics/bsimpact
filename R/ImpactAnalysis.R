@@ -36,11 +36,14 @@
 #'   costs (optional):
 #'   \describe{
 #'     \item{\code{get_incursion()}}{Get incursion object.}
-#'     \item{\code{incursion_impacts()}}{Calculate (likely) incursion impacts
-#'       for each aspect of the environment, society, and/or economy.}
-#'     \item{\code{combined_impacts()}}{Combine (likely) incursion impacts
-#'       across aspects of the environment, society, and/or economy, to produce
-#'       an overall impact at each location.}
+#'     \item{\code{incursion_impacts(raw = FALSE)}}{Calculate (likely)
+#'       incursion impacts for each aspect of the environment, society, and/or
+#'       economy. Returns results consistent with region, or vectors when
+#'       \code{raw = TRUE}.}
+#'     \item{\code{combined_impacts(raw = FALSE)}}{Combine (likely) incursion
+#'       impacts across aspects of the environment, society, and/or economy, to
+#'       produce an overall impact at each location. Returns result consistent
+#'       with region, or a vector when \code{raw = TRUE}.}
 #'     \item{\code{incursion_mgmt_costs()}}{Calculate (likely) incursion
 #'       management costs at each location (when specified).}
 #'     \item{\code{save_analysis(...)}}{Save the impact analysis as a
@@ -134,13 +137,13 @@ ImpactAnalysis.Context <- function(context,
   }
 
   # Calculate (likely) incursion impacts for each aspect
-  self$incursion_impacts <- function() {
+  self$incursion_impacts <- function(raw = FALSE) {
     # overridden in inherited classes
   }
 
   # Combine (likely) impacts across aspects to produce an overall impact
   if (!is.character(combine_function) || combine_function != "none") {
-    self$combined_impacts <- function() {
+    self$combined_impacts <- function(raw = FALSE) {
       # overridden in inherited classes
     }
   }

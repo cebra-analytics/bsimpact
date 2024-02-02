@@ -72,11 +72,14 @@ for classifying and combining invasive species (likely) incursion impacts,
 and management costs (optional):
 \describe{
 \item{\code{get_incursion()}}{Get incursion object.}
-\item{\code{incursion_impacts()}}{Classify (likely) incursion impacts
-for each aspect of the environment, society, and/or economy.}
-\item{\code{combined_impacts()}}{Combine (likely) incursion impacts
-across aspects of the environment, society, and/or economy, to produce
-an overall impact class at each location.}
+\item{\code{incursion_impacts(raw = FALSE)}}{Classify (likely)
+incursion impacts for each aspect of the environment, society, and/or
+economy. Returns results consistent with region, or vectors when
+\code{raw = TRUE}.}
+\item{\code{combined_impacts(raw = FALSE)}}{Combine (likely) incursion
+impacts across aspects of the environment, society, and/or economy, to
+produce an overall impact at each location. Returns result consistent
+with region, or a vector when \code{raw = TRUE}.}
 \item{\code{incursion_mgmt_costs()}}{Calculate (likely) incursion
 management costs at each location (when specified).}
 \item{\code{save_analysis(...)}}{Save the impact analysis as a
