@@ -35,6 +35,7 @@
 #'   for calculating invasive species (likely) incursion impacts and management
 #'   costs (optional):
 #'   \describe{
+#'     \item{\code{get_context()}}{Get context object.}
 #'     \item{\code{get_incursion()}}{Get incursion object.}
 #'     \item{\code{incursion_impacts(raw = FALSE)}}{Calculate (likely)
 #'       incursion impacts for each aspect of the environment, society, and/or
@@ -130,6 +131,11 @@ ImpactAnalysis.Context <- function(context,
 
   # Create a class structure
   self <- structure(list(), class = c(subclass, "ImpactAnalysis"))
+
+  # Get context
+  self$get_context <- function() {
+    return(context)
+  }
 
   # Get incursion object
   self$get_incursion <- function() {

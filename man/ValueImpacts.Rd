@@ -69,6 +69,7 @@ A \code{ValueImpacts} class object (list) containing functions
 for calculating and combining invasive species (likely) incursion impacts,
 management costs (optional), and total costs (when applicable):
 \describe{
+\item{\code{get_context()}}{Get context object.}
 \item{\code{get_incursion()}}{Get incursion object.}
 \item{\code{incursion_impacts(raw = FALSE)}}{Calculate (likely)
 incursion impacts (damages or losses) for each aspect of the

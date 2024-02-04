@@ -38,19 +38,20 @@ test_that("initializes with parameters", {
                                         impact_layers, impact_classes))
   expect_is(impacts, "ClassImpacts")
   expect_s3_class(impacts, "ImpactAnalysis")
+  expect_is(impacts$get_context(), "Context")
   expect_is(impacts$get_incursion(), "Incursion")
-  expect_named(impacts, c("get_incursion", "incursion_impacts",
+  expect_named(impacts, c("get_context", "get_incursion", "incursion_impacts",
                           "combined_impacts", "save_analysis"))
 
   expect_silent(impacts <- ClassImpacts(context, region, incursion,
                                         impact_layers, impact_classes,
                                         combine_function = "none"))
-  expect_named(impacts, c("get_incursion", "incursion_impacts",
+  expect_named(impacts, c("get_context", "get_incursion", "incursion_impacts",
                           "save_analysis"))
   expect_silent(impacts <- ClassImpacts(context, region, incursion,
                                         impact_layers, impact_classes,
                                         combine_function = function(x) x))
-  expect_named(impacts, c("get_incursion", "incursion_impacts",
+  expect_named(impacts, c("get_context", "get_incursion", "incursion_impacts",
                           "combined_impacts", "save_analysis"))
 })
 
@@ -169,7 +170,7 @@ test_that("calculates incursion management costs", {
   expect_silent(
     impacts <- ClassImpacts(context, region, incursion, impact_layers,
                             impact_classes, mgmt_costs = mgmt_costs))
-  expect_named(impacts, c("get_incursion", "incursion_impacts",
+  expect_named(impacts, c("get_context", "get_incursion", "incursion_impacts",
                           "combined_impacts", "incursion_mgmt_costs",
                           "save_analysis"))
   expected_incursion_mgmt_costs <-

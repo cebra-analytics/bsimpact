@@ -71,6 +71,7 @@ A \code{ClassImpacts} class object (list) containing functions
 for classifying and combining invasive species (likely) incursion impacts,
 and management costs (optional):
 \describe{
+\item{\code{get_context()}}{Get context object.}
 \item{\code{get_incursion()}}{Get incursion object.}
 \item{\code{incursion_impacts(raw = FALSE)}}{Classify (likely)
 incursion impacts for each aspect of the environment, society, and/or

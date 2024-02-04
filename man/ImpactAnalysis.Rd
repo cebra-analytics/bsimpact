@@ -66,6 +66,7 @@ An \code{ImpactAnalysis} class object (list) containing functions
 for calculating invasive species (likely) incursion impacts and management
 costs (optional):
 \describe{
+\item{\code{get_context()}}{Get context object.}
 \item{\code{get_incursion()}}{Get incursion object.}
 \item{\code{incursion_impacts(raw = FALSE)}}{Calculate (likely)
 incursion impacts for each aspect of the environment, society, and/or
