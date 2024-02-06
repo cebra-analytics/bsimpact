@@ -181,7 +181,7 @@ ValueImpacts.Context <- function(context,
   # Calculate (likely) incursion impacts for each aspect
   incursion_impacts <- NULL
   self$incursion_impacts <- function(raw = FALSE) { # overridden
-    if (is.null(incursion_impacts)) {
+    if (is.null(incursion_impacts) || raw) {
 
       # Get impact incursion values
       impact_incursion <- incursion$get_impact_incursion()
@@ -216,7 +216,7 @@ ValueImpacts.Context <- function(context,
   combined_impacts <- NULL
   if (!is.character(combine_function) || combine_function != "none") {
     self$combined_impacts <- function(raw = FALSE) { # overridden
-      if (is.null(combined_impacts)) {
+      if (is.null(combined_impacts) || raw) {
 
         # Get incursion impacts
         incursion_impacts <- self$incursion_impacts(raw = raw)
