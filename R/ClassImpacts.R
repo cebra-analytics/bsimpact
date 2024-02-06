@@ -163,7 +163,7 @@ ClassImpacts.Context <- function(context,
   # Calculate (likely) incursion impacts for each aspect
   incursion_impacts <- NULL
   self$incursion_impacts <- function(raw = FALSE) { # overridden
-    if (is.null(incursion_impacts)) {
+    if (is.null(incursion_impacts) || raw) {
 
       # Get binary impact incursion values
       impact_incursion <- 1*(incursion$get_impact_incursion() > 0)
@@ -219,10 +219,12 @@ ClassImpacts.Context <- function(context,
   combined_impacts <- NULL
   if (!is.character(combine_function) || combine_function != "none") {
     self$combined_impacts <- function(raw = FALSE) { # overridden
-      if (is.null(combined_impacts)) {
+      if (is.null(combined_impacts) || raw) {
 
         # Get incursion impacts
-        incursion_impacts <- self$incursion_impacts(raw = raw)
+        if (is.null(incursion_impacts)) {
+          incursion_impacts <- self$incursion_impacts(raw = raw)
+        }
 
         # Extract spatial raster incursion impact layer values
         for (i in 1:length(incursion_impacts)) {

@@ -219,7 +219,9 @@ ValueImpacts.Context <- function(context,
       if (is.null(combined_impacts) || raw) {
 
         # Get incursion impacts
-        incursion_impacts <- self$incursion_impacts(raw = raw)
+        if (is.null(incursion_impacts)) {
+          incursion_impacts <- self$incursion_impacts(raw = raw)
+        }
 
         # Extract spatial raster incursion impact layer values
         for (i in 1:length(incursion_impacts)) {
