@@ -130,6 +130,15 @@ Context.default <- function(species_name,
   # Ensure impact scope/aspects are strings
   impact_scope <- as.character(impact_scope)
 
+  # Ensure impact measures are appropriate for valuation type
+  if (valuation_type == "monetary" && length(unique(impact_measures)) > 1) {
+    stop("Monetary impacts must use the same impact measure.", call. = FALSE)
+  } else if (valuation_type == "non-monetary" &&
+             !length(impact_measures) %in% c(1, length(impact_scope))) {
+    stop(paste("The number of non-monetary impact measures must be consistent",
+               "with the number of impact scope aspects."), call. = FALSE)
+  }
+
   # Create a class structure
   self <- structure(list(), class = "Context")
 

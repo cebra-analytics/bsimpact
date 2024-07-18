@@ -47,6 +47,18 @@ test_that("initializes with parameters", {
                                         combine_function = "none"))
   expect_named(impacts, c("get_context", "get_incursion", "incursion_impacts",
                           "save_analysis"))
+
+  context <- Context("My species", impact_scope = c("aspect1", "aspect2"),
+                     valuation_type = "non-monetary",
+                     impact_measures = c("$", "HCAS"))
+  expect_error(impacts <- ValueImpacts(context, region, incursion,
+                                       impact_layers, loss_rates = loss_rates,
+                                       combine_function = "sum"),
+               paste("Cannot combine impact aspects that have different",
+                     "impact measures."))
+  expect_silent(impacts <- ValueImpacts(context, region, incursion,
+                                        impact_layers, loss_rates = loss_rates,
+                                        combine_function = "none"))
 })
 
 test_that("calculates individual and combined incursion impacts", {

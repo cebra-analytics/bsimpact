@@ -154,11 +154,17 @@ ValueImpacts.Context <- function(context,
 
   # Check context is consistent with quantitative impact analysis
   if (!context$get_valuation_type() %in% c("monetary", "non-monetary") ||
-      length(context$get_impact_measures()) > 1 ||
       !is.character(context$get_impact_measures())) {
     stop(sprintf(paste("Context is inappropriately configured for value-based",
                        "impact analysis with '%s' valuation or invalid",
                        "measure(s)."), context$get_valuation_type()),
+         call. = FALSE)
+  }
+
+  # Check measures can be combined
+  if ((is.function(combine_function) || combine_function != "none") &&
+      length(unique(context$get_impact_measures())) > 1) {
+    stop("Cannot combine impact aspects that have different impact measures.",
          call. = FALSE)
   }
 
