@@ -51,3 +51,15 @@ test_that("sets incursion values", {
   expect_silent(incursion$set_values(0.8*original_x))
   expect_equal(incursion$get_impact_incursion(), 0.8*original_x)
 })
+
+test_that("sets incursion values", {
+  TEST_DIRECTORY <- test_path("test_inputs")
+  template <- terra::rast(file.path(TEST_DIRECTORY, "greater_melb.tif"))
+  region <- Region(template*0)
+  expect_silent(incursion <- Incursion(template*100, region, type = "area"))
+  expect_equal(incursion$get_type(), "area")
+  expected_x <- template[][,1][region$get_indices()]*100
+  expect_equal(incursion$get_impact_incursion(), expected_x)
+  expect_silent(incursion <- Incursion(100, Region(), type = "area"))
+  expect_equal(incursion$get_impact_incursion(), 100)
+})

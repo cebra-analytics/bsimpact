@@ -36,13 +36,16 @@ spatial region (template) for the impact analysis.}
 
 \item{incursion}{An \code{Incursion} or inherited class object representing
 the spatial distribution of an actual invasive species presence or
-density, or incursion likelihoods across the \code{region}.}
+density, area of occupancy (metres squared), or incursion likelihoods
+across the \code{region}.}
 
 \item{impact_layers}{A named list of spatial layers
 (\code{terra::SpatRaster} or \code{raster::RasterLayer}) or vectors of
 location values (consistent with the spatial \code{region}), for each
 named aspect (mechanism, service, sector, asset type, etc.) specified via
-the impact scope in the \code{context}.}
+the impact scope in the \code{context}. When incursions are expressed as
+area of occupancy (type \code{area}), each impact value should be
+expressed as value per metres squared.}
 
 \item{loss_rates}{A vector of value loss rates for each named aspect
 (mechanism, service, sector, asset type, etc.) specified via the impact
