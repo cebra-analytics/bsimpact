@@ -23,6 +23,11 @@
 #' @param loss_rates A vector of value loss rates for each named aspect
 #'   (mechanism, service, sector, asset type, etc.) specified via the impact
 #'   scope in the \code{context}.
+#' @param discount_rate An optional discount rate (per time interval) for the
+#'   impacted values to estimate future values that account for inflation.
+#'   Typically the discounting uses market interest rates. Discounted impacts
+#'   are calculated by dividing the value losses by
+#'   \code{(1 + discount_rate)^time_int} for a specified time interval.
 #' @param combine_function The function used to combine impact layers across
 #'   aspects of the environment, society, and/or economy. Either \code{"sum"}
 #'   or a user defined function having the form
@@ -42,10 +47,12 @@
 #'   \describe{
 #'     \item{\code{get_context()}}{Get context object.}
 #'     \item{\code{get_incursion()}}{Get incursion object.}
-#'     \item{\code{incursion_impacts(raw = FALSE)}}{Calculate (likely)
-#'       incursion impacts (damages or losses) for each aspect of the
-#'       environment, society, and/or economy. Returns results consistent with
-#'       region, or vectors when \code{raw = TRUE}.}
+#'     \item{\code{incursion_impacts(raw = FALSE, time_int = NULL)}}{
+#'       Calculate (likely) incursion impacts (damages or losses) for each
+#'       aspect of the environment, society, and/or economy. Returns results
+#'       consistent with region, or vectors when \code{raw = TRUE}. When a
+#'       discount rate is specified, the impact will be calculated based on
+#'       future values at the time interval \code{time_int} (when provided).}
 #'     \item{\code{combined_impacts(raw = FALSE)}}{Combine (likely) incursion
 #'       impacts across aspects of the environment, society, and/or economy, to
 #'       produce an overall impact (damage or loss) at each location. Returns
@@ -126,6 +133,7 @@ ValueImpacts <- function(context,
                          incursion,
                          impact_layers,
                          loss_rates,
+                         discount_rate = NULL,
                          combine_function = c("sum", "none"),
                          mgmt_costs = NULL, ...) {
   UseMethod("ValueImpacts")
@@ -138,6 +146,7 @@ ValueImpacts.Context <- function(context,
                                  incursion,
                                  impact_layers,
                                  loss_rates,
+                                 discount_rate = NULL,
                                  combine_function = c("sum", "none"),
                                  mgmt_costs = NULL, ...) {
 
@@ -187,9 +196,16 @@ ValueImpacts.Context <- function(context,
                "consistently with the context impact scope."), call. = FALSE)
   }
 
+  # Check discount rate
+  if (!is.null(discount_rate) &&
+      (!is.numeric(discount_rate) || discount_rate < 0 || discount_rate > 1)) {
+    stop("Discount rate must be numeric, >= 0, and <= 1.", call. = FALSE)
+  }
+
   # Calculate (likely) incursion impacts for each aspect
   incursion_impacts <- NULL
-  self$incursion_impacts <- function(raw = FALSE) { # overridden
+  self$incursion_impacts <- function(raw = FALSE,
+                                     time_int = NULL) { # overridden
     if (is.null(incursion_impacts) || raw) {
 
       # Get impact incursion values
@@ -202,11 +218,17 @@ ValueImpacts.Context <- function(context,
         }
       }
 
+      # Calculate discount multiplier
+      disc_mult <- 1
+      if (is.numeric(discount_rate) && is.numeric(time_int)) {
+        disc_mult <- 1/(1 + discount_rate)^time_int
+      }
+
       # Calculate incursion impacts
       incursion_impacts <<- list()
       for (aspect in names(impact_layers)) {
         incursion_impacts[[aspect]] <<-
-          impact_layers[[aspect]]*loss_rates[aspect]*impact_incursion
+          impact_layers[[aspect]]*loss_rates[aspect]*impact_incursion*disc_mult
       }
 
       # Place in spatial rasters when grid region

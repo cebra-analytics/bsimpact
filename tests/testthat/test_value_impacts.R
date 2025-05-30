@@ -33,6 +33,11 @@ test_that("initializes with parameters", {
                             loss_rates = c(0.3, 0.4)),
     paste("Unnamed loss rates assumed to be in order consistent with the",
           "context impact scope."))
+  expect_error(impacts <- ValueImpacts(context, region, incursion,
+                                       impact_layers, loss_rates = loss_rates,
+                                       discount_rate = 5),
+               "Discount rate must be numeric, >= 0, and <= 1.")
+
   expect_silent(
     impacts <- ValueImpacts(context, region, incursion,
                             impact_layers, loss_rates = loss_rates))
@@ -161,4 +166,29 @@ test_that("calculates incursion management and total costs", {
   expect_silent(total_costs <- impacts$total_costs())
   expect_is(total_costs, "SpatRaster")
   expect_equal(total_costs[region$get_indices()][,1], expected_total_costs)
+})
+
+test_that("applies discounts to incursion impacts", {
+  TEST_DIRECTORY <- test_path("test_inputs")
+  context <- Context("My species", impact_scope = c("aspect1", "aspect2"))
+  template <- terra::rast(file.path(TEST_DIRECTORY, "greater_melb.tif"))
+  region <- Region(template*0)
+  incursion <- Incursion(template, region)
+  impact_layers <- list(aspect1 = 100*(template > 0.1 & template < 0.3),
+                        aspect2 = 200*(template > 0.2 & template < 0.4))
+  loss_rates = c(aspect1 = 0.3, aspect2 = 0.4)
+  expect_silent(impacts <- ValueImpacts(context, region, incursion,
+                                        impact_layers,
+                                        loss_rates = loss_rates,
+                                        discount_rate = 0.05))
+  expected_impacts <-
+    lapply(list(aspect1 = "aspect1", aspect2 = "aspect2"), function(a) {
+      (impact_layers[[a]][region$get_indices()][,1]*loss_rates[a]/((1.05)^3)*
+         incursion$get_impact_incursion())})
+  expect_silent(incursion_impacts <- impacts$incursion_impacts(raw = TRUE,
+                                                               time_int = 3))
+  expect_equal(incursion_impacts, expected_impacts)
+  expected_combined_impacts <- expected_impacts[[1]] + expected_impacts[[2]]
+  expect_silent(combined_impacts <- impacts$combined_impacts(raw = TRUE))
+  expect_equal(combined_impacts, expected_combined_impacts)
 })
