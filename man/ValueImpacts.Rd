@@ -11,7 +11,7 @@ ValueImpacts(
   incursion,
   impact_layers,
   loss_rates,
-  discount_rate = NULL,
+  discount_rates = NULL,
   combine_function = c("sum", "none"),
   mgmt_costs = NULL,
   ...
@@ -23,7 +23,7 @@ ValueImpacts(
   incursion,
   impact_layers,
   loss_rates,
-  discount_rate = NULL,
+  discount_rates = NULL,
   combine_function = c("sum", "none"),
   mgmt_costs = NULL,
   ...
@@ -53,10 +53,10 @@ expressed as value per metres squared.}
 (mechanism, service, sector, asset type, etc.) specified via the impact
 scope in the \code{context}.}
 
-\item{discount_rate}{An optional discount rate (per time interval) for the
-impacted values to estimate future values that account for inflation.
-Typically the discounting uses market interest rates. Discounted impacts
-are calculated by dividing the value losses by
+\item{discount_rates}{An optional named vector of discount rates (per time
+interval) for the impacted values to estimate future values that account
+for inflation. Typically the discounting uses market interest rates.
+Discounted impacts are calculated by dividing the value losses by
 \code{(1 + discount_rate)^time_int} for a specified time interval.}
 
 \item{combine_function}{The function used to combine impact layers across
@@ -85,8 +85,8 @@ management costs (optional), and total costs (when applicable):
 \item{\code{incursion_impacts(raw = FALSE, time_int = NULL)}}{
 Calculate (likely) incursion impacts (damages or losses) for each
 aspect of the environment, society, and/or economy. Returns results
-consistent with region, or vectors when \code{raw = TRUE}. When a
-discount rate is specified, the impact will be calculated based on
+consistent with region, or vectors when \code{raw = TRUE}. When
+discount rates are specified, the impact will be calculated based on
 future values at the time interval \code{time_int} (when provided).}
 \item{\code{combined_impacts(raw = FALSE)}}{Combine (likely) incursion
 impacts across aspects of the environment, society, and/or economy, to

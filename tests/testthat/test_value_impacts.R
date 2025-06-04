@@ -11,6 +11,7 @@ test_that("initializes with parameters", {
   impact_layers <- list(aspect1 = 100*(template > 0.1 & template < 0.3),
                         aspect2 = 200*(template > 0.2 & template < 0.4))
   loss_rates = c(aspect1 = 0.3, aspect2 = 0.4)
+  discount_rates = c(aspect1 = 0.04, aspect2 = 0.05)
   expect_error(ValueImpacts(context_alt, region, incursion, impact_layers,
                             loss_rates),
                paste("Context is inappropriately configured for value-based",
@@ -33,14 +34,25 @@ test_that("initializes with parameters", {
                             loss_rates = c(0.3, 0.4)),
     paste("Unnamed loss rates assumed to be in order consistent with the",
           "context impact scope."))
-  expect_error(impacts <- ValueImpacts(context, region, incursion,
-                                       impact_layers, loss_rates = loss_rates,
-                                       discount_rate = 5),
-               "Discount rate must be numeric, >= 0, and <= 1.")
-
+  expect_error(ValueImpacts(context, region, incursion, impact_layers,
+                            loss_rates = loss_rates, discount_rates = 0.05),
+               paste("Discount rates must be numeric, >= 0, <= 1, and named",
+                     "consistently with the context impact scope."))
+  expect_error(ValueImpacts(context, region, incursion, impact_layers,
+                            loss_rates = loss_rates,
+                            discount_rates = c(a = 0.04, b = 0.05)),
+               paste("Discount rates must be numeric, >= 0, <= 1, and named",
+                     "consistently with the context impact scope."))
+  expect_message(
+    impacts <- ValueImpacts(context, region, incursion, impact_layers,
+                            loss_rates = loss_rates,
+                            discount_rates = c(0.04, 0.05)),
+    paste("Unnamed discount rates assumed to be in order consistent with the",
+          "context impact scope."))
   expect_silent(
     impacts <- ValueImpacts(context, region, incursion,
-                            impact_layers, loss_rates = loss_rates))
+                            impact_layers, loss_rates = loss_rates,
+                            discount_rates = discount_rates))
   expect_is(impacts, "ValueImpacts")
   expect_s3_class(impacts, "ImpactAnalysis")
   expect_named(impacts, c("get_context", "get_incursion", "incursion_impacts",
@@ -177,14 +189,15 @@ test_that("applies discounts to incursion impacts", {
   impact_layers <- list(aspect1 = 100*(template > 0.1 & template < 0.3),
                         aspect2 = 200*(template > 0.2 & template < 0.4))
   loss_rates = c(aspect1 = 0.3, aspect2 = 0.4)
+  discount_rates = c(aspect1 = 0.04, aspect2 = 0.05)
   expect_silent(impacts <- ValueImpacts(context, region, incursion,
                                         impact_layers,
                                         loss_rates = loss_rates,
-                                        discount_rate = 0.05))
+                                        discount_rates = discount_rates))
   expected_impacts <-
     lapply(list(aspect1 = "aspect1", aspect2 = "aspect2"), function(a) {
-      (impact_layers[[a]][region$get_indices()][,1]*loss_rates[a]/((1.05)^3)*
-         incursion$get_impact_incursion())})
+      (impact_layers[[a]][region$get_indices()][,1]*loss_rates[a]/
+         ((1 + discount_rates[a])^3)*incursion$get_impact_incursion())})
   expect_silent(incursion_impacts <- impacts$incursion_impacts(raw = TRUE,
                                                                time_int = 3))
   expect_equal(incursion_impacts, expected_impacts)

@@ -1,6 +1,6 @@
 Package: bsimpact
 Title: Biosecurity Impact Analysis
-Version: 0.0.7
+Version: 0.0.8
 Authors@R: c(person("Sean", "Haythorne", 
                     email = "sean.haythorne@unimelb.edu.au", 
                     role = c("aut", "cre")))
