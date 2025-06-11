@@ -203,7 +203,8 @@ ValueImpacts.Context <- function(context,
        (!is.null(names(discount_rates)) &&
         !all(names(discount_rates) %in% context$get_impact_scope())) ||
        (is.null(names(discount_rates)) &&
-        length(discount_rates) != length(context$get_impact_scope())))) {
+        !(length(discount_rates) %in%
+          c(1, length(context$get_impact_scope())))))) {
     stop(paste("Discount rates must be numeric, >= 0, <= 1, and named",
                "consistently with the context impact scope."), call. = FALSE)
   }
@@ -212,6 +213,9 @@ ValueImpacts.Context <- function(context,
     names(discount_rates) <- context$get_impact_scope()
     message(paste("Unnamed discount rates assumed to be in order consistent",
                   "with the context impact scope."))
+  } else if (length(discount_rates) == 1 && is.null(names(discount_rates))) {
+    discount_rates <- rep(discount_rates, length(context$get_impact_scope()))
+    names(discount_rates) <- context$get_impact_scope()
   }
 
   # Calculate (likely) incursion impacts for each aspect

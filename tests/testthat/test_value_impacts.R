@@ -35,7 +35,8 @@ test_that("initializes with parameters", {
     paste("Unnamed loss rates assumed to be in order consistent with the",
           "context impact scope."))
   expect_error(ValueImpacts(context, region, incursion, impact_layers,
-                            loss_rates = loss_rates, discount_rates = 0.05),
+                            loss_rates = loss_rates,
+                            discount_rates = c(a = 0.05)),
                paste("Discount rates must be numeric, >= 0, <= 1, and named",
                      "consistently with the context impact scope."))
   expect_error(ValueImpacts(context, region, incursion, impact_layers,
@@ -204,4 +205,15 @@ test_that("applies discounts to incursion impacts", {
   expected_combined_impacts <- expected_impacts[[1]] + expected_impacts[[2]]
   expect_silent(combined_impacts <- impacts$combined_impacts(raw = TRUE))
   expect_equal(combined_impacts, expected_combined_impacts)
+  expect_silent(impacts <- ValueImpacts(context, region, incursion,
+                                        impact_layers,
+                                        loss_rates = loss_rates,
+                                        discount_rates = 0.05))
+  expected_impacts <-
+    lapply(list(aspect1 = "aspect1", aspect2 = "aspect2"), function(a) {
+      (impact_layers[[a]][region$get_indices()][,1]*loss_rates[a]/
+         ((1 + 0.05)^3)*incursion$get_impact_incursion())})
+  expect_silent(incursion_impacts <- impacts$incursion_impacts(raw = TRUE,
+                                                               time_int = 3))
+  expect_equal(incursion_impacts, expected_impacts)
 })
