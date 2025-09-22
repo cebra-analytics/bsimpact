@@ -120,6 +120,9 @@ Incursion.default <- function(x,
   # Get transformed incursion values for calculating impacts
   self$get_impact_incursion <- function() {
 
+    # Check for recovery delay
+    recovery_delay <- attr(x, "recovery_delay")
+
     # Apply multiplier then threshold
     x <- as.numeric(x)*multiplier
     x <- x*(x > threshold)
@@ -128,6 +131,9 @@ Incursion.default <- function(x,
     if (type %in% c("presence", "density", "prob")) {
       x[which(x > 1)] <- 1
     }
+
+    # Re-attach recovery delay
+    attr(x, "recovery_delay") <- recovery_delay
 
     return(x)
   }

@@ -52,7 +52,11 @@
 #'       aspect of the environment, society, and/or economy. Returns results
 #'       consistent with region, or vectors when \code{raw = TRUE}. When
 #'       discount rates are specified, the impact will be calculated based on
-#'       future values at the time interval \code{time_int} (when provided).}
+#'       future values at the time interval \code{time_int} (when provided).
+#'       Incursions of type \code{"presence"} may also define a recovery delay
+#'       via a \code{recovery_delay} attribute attached to the population
+#'       vector (see \code{bsmanage::ManageImpacts}), which prolongs calculated
+#'       impacts after removed or extirpated local populations.}
 #'     \item{\code{combined_impacts(raw = FALSE)}}{Combine (likely) incursion
 #'       impacts across aspects of the environment, society, and/or economy, to
 #'       produce an overall impact (damage or loss) at each location. Returns
@@ -226,6 +230,13 @@ ValueImpacts.Context <- function(context,
 
       # Get impact incursion values
       impact_incursion <- incursion$get_impact_incursion()
+
+      # Recovery delays prolong impacts
+      if (incursion$get_type() == "presence" &&
+          is.numeric(attr(impact_incursion, "recovery_delay"))) {
+        impact_incursion <- +(impact_incursion > 0 |
+                                attr(impact_incursion, "recovery_delay") > 0)
+      }
 
       # Extract spatial raster impact layer values
       for (i in 1:length(impact_layers)) {

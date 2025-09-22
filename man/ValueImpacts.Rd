@@ -87,7 +87,11 @@ Calculate (likely) incursion impacts (damages or losses) for each
 aspect of the environment, society, and/or economy. Returns results
 consistent with region, or vectors when \code{raw = TRUE}. When
 discount rates are specified, the impact will be calculated based on
-future values at the time interval \code{time_int} (when provided).}
+future values at the time interval \code{time_int} (when provided).
+Incursions of type \code{"presence"} may also define a recovery delay
+via a \code{recovery_delay} attribute attached to the population
+vector (see \code{bsmanage::ManageImpacts}), which prolongs calculated
+impacts after removed or extirpated local populations.}
 \item{\code{combined_impacts(raw = FALSE)}}{Combine (likely) incursion
 impacts across aspects of the environment, society, and/or economy, to
 produce an overall impact (damage or loss) at each location. Returns

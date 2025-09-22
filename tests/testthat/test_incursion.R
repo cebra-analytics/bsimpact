@@ -50,9 +50,14 @@ test_that("sets incursion values", {
                "The incursion probability values must be <= 1.")
   expect_silent(incursion$set_values(0.8*original_x))
   expect_equal(incursion$get_impact_incursion(), 0.8*original_x)
+  attr(original_x, "recovery_delay") <- rep(3, region$get_locations())
+  expect_silent(incursion$set_values(original_x))
+  expect_equal(incursion$get_impact_incursion(), original_x)
+  expect_equal(attr(incursion$get_impact_incursion(), "recovery_delay"),
+               attr(original_x, "recovery_delay"))
 })
 
-test_that("sets incursion values", {
+test_that("handles area incursions", {
   TEST_DIRECTORY <- test_path("test_inputs")
   template <- terra::rast(file.path(TEST_DIRECTORY, "greater_melb.tif"))
   region <- Region(template*0)

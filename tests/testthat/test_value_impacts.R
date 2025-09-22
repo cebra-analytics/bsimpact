@@ -217,3 +217,28 @@ test_that("applies discounts to incursion impacts", {
                                                                time_int = 3))
   expect_equal(incursion_impacts, expected_impacts)
 })
+
+test_that("applies recovery delay to prolong impacts", {
+  TEST_DIRECTORY <- test_path("test_inputs")
+  context <- Context("My species", impact_scope = c("aspect1", "aspect2"))
+  template <- terra::rast(file.path(TEST_DIRECTORY, "greater_melb.tif"))
+  region <- Region(template*0)
+  incursion <- Incursion(template, region)
+  impact_layers <- list(aspect1 = 100*(template > 0.1 & template < 0.5),
+                        aspect2 = 200*(template > 0.4 & template < 0.8))
+  loss_rates = c(aspect1 = 0.3, aspect2 = 0.4)
+  expect_silent(impacts <- ValueImpacts(context, region, incursion,
+                                        impact_layers,
+                                        loss_rates = loss_rates))
+  x <- incursion$get_impact_incursion()
+  attr(x, "recovery_delay") <- rep(0, region$get_locations())
+  attr(x, "recovery_delay")[which(x == 0)[1:100]] <- 1
+  incursion$set_values(x)
+  x_with_delay <- +(x > 0)
+  x_with_delay[which(x == 0)[1:100]] <- 1
+  expected_impacts <-
+    lapply(list(aspect1 = "aspect1", aspect2 = "aspect2"), function(a) {
+      (impact_layers[[a]][region$get_indices()][,1]*loss_rates[a]*
+         x_with_delay)})
+  expect_equal(impacts$incursion_impacts(raw = TRUE), expected_impacts)
+})
