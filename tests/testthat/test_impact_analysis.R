@@ -53,23 +53,28 @@ test_that("initializes with parameters", {
   expect_silent(impacts <- ImpactAnalysis(context, region, incursion,
                                           impact_layers))
   expect_is(impacts, "ImpactAnalysis")
-  expect_named(impacts, c("get_context", "get_incursion", "incursion_impacts",
-                          "combined_impacts", "save_analysis"))
+  expect_named(impacts, c("get_context", "get_incursion", "get_id", "set_id",
+                          "incursion_impacts", "combined_impacts",
+                          "save_analysis"))
   expect_is(impacts$get_context(), "Context")
   expect_is(impacts$get_incursion(), "Incursion")
+  expect_equal(impacts$get_id(), 1)
+  expect_silent(impacts$set_id(3))
+  expect_equal(impacts$get_id(), 3)
   expect_null(impacts$incursion_impacts())
   expect_null(impacts$combined_impacts())
   expect_silent(impacts <- ImpactAnalysis(context, region, incursion,
                                           impact_layers,
                                           combine_function = "none"))
-  expect_named(impacts, c("get_context", "get_incursion", "incursion_impacts",
-                          "save_analysis"))
+  expect_named(impacts, c("get_context", "get_incursion", "get_id", "set_id",
+                          "incursion_impacts", "save_analysis"))
   expect_silent(impacts <- ImpactAnalysis(context, region, incursion,
                                           impact_layers,
                                           loss_rates = loss_rates,
                                           combine_function = function(x) x))
-  expect_named(impacts, c("get_context", "get_incursion", "incursion_impacts",
-                          "combined_impacts", "save_analysis"))
+  expect_named(impacts, c("get_context", "get_incursion", "get_id", "set_id",
+                          "incursion_impacts", "combined_impacts",
+                          "save_analysis"))
 })
 
 test_that("calculates incursion management costs", {
@@ -98,9 +103,9 @@ test_that("calculates incursion management costs", {
   expect_silent(impacts <- ImpactAnalysis(context, region, incursion,
                                           impact_layers,
                                           mgmt_costs = mgmt_costs))
-  expect_named(impacts, c("get_context", "get_incursion", "incursion_impacts",
-                          "combined_impacts", "incursion_mgmt_costs",
-                          "save_analysis"))
+  expect_named(impacts, c("get_context", "get_incursion", "get_id", "set_id",
+                          "incursion_impacts", "combined_impacts",
+                          "incursion_mgmt_costs", "save_analysis"))
   expected_values <- ((mgmt_costs*impact_locations)[region$get_indices()][,1]*
                         incursion$get_impact_incursion())
   expect_silent(incursion_mgmt_costs <- impacts$incursion_mgmt_costs())

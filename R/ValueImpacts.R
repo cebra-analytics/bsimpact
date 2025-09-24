@@ -232,10 +232,14 @@ ValueImpacts.Context <- function(context,
       impact_incursion <- incursion$get_impact_incursion()
 
       # Recovery delays prolong impacts
+      id <- self$get_id()
       if (incursion$get_type() == "presence" &&
-          is.numeric(attr(impact_incursion, "recovery_delay"))) {
-        impact_incursion <- +(impact_incursion > 0 |
-                                attr(impact_incursion, "recovery_delay") > 0)
+          is.list(attr(impact_incursion, "recovery_delay")) &&
+          length(attr(impact_incursion, "recovery_delay")) >= id &&
+          is.numeric(attr(impact_incursion, "recovery_delay")[[id]])) {
+        impact_incursion <-
+          +(impact_incursion > 0 |
+              attr(impact_incursion, "recovery_delay")[[id]] > 0)
       }
 
       # Extract spatial raster impact layer values

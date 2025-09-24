@@ -37,6 +37,8 @@
 #'   \describe{
 #'     \item{\code{get_context()}}{Get context object.}
 #'     \item{\code{get_incursion()}}{Get incursion object.}
+#'     \item{\code{get_id()}}{Get the impacts numeric identifier.}
+#'     \item{\code{set_id(id)}}{Set the impacts numeric identifier.}
 #'     \item{\code{incursion_impacts(raw = FALSE)}}{Calculate (likely)
 #'       incursion impacts for each aspect of the environment, society, and/or
 #'       economy. Returns results consistent with region, or vectors when
@@ -140,6 +142,19 @@ ImpactAnalysis.Context <- function(context,
   # Get incursion object
   self$get_incursion <- function() {
     return(incursion)
+  }
+
+  # Id for tracking multiple impacts
+  id <- 1
+
+  # Get the impacts id
+  self$get_id <- function() {
+    return(id)
+  }
+
+  # Set the impacts id
+  self$set_id <- function(id) {
+    id <<- id
   }
 
   # Calculate (likely) incursion impacts for each aspect
