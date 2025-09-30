@@ -244,4 +244,35 @@ test_that("applies recovery delay to prolong impacts", {
       (impact_layers[[a]][region$get_indices()][,1]*loss_rates[a]*
          x_with_delay)})
   expect_equal(impacts$incursion_impacts(raw = TRUE), expected_impacts)
+  # spatially implicit area-based impacts
+  region <- Region()
+  incursion <- Incursion(0, region, type = "area")
+  impact_layers <- list(aspect1 = 100, aspect2 = 200)
+  expect_silent(impacts <- ValueImpacts(context, region, incursion,
+                                        impact_layers,
+                                        loss_rates = loss_rates))
+  expect_silent(impacts$set_id(3))
+  x <- 50
+  incursion$set_values(x) # 0
+  expect_equal(impacts$incursion_impacts(raw = TRUE),
+               list(aspect1 = 100*50*0.3, aspect2 = 200*50*0.4))
+  x[1] <- 30
+  attr(x, "recovery_delay") <- list(NULL, NULL, 2)
+  attr(attr(x, "recovery_delay"), "incursions") <- 50
+  incursion$set_values(x) # 1
+  expect_equal(impacts$incursion_impacts(raw = TRUE),
+               list(aspect1 = 100*50*0.3, aspect2 = 200*50*0.4))
+  x[1] <- 0
+  attr(attr(x, "recovery_delay"), "incursions") <- c(30, 50)
+  incursion$set_values(x) # 2
+  expect_equal(impacts$incursion_impacts(raw = TRUE),
+               list(aspect1 = 100*50*0.3, aspect2 = 200*50*0.4))
+  attr(attr(x, "recovery_delay"), "incursions") <- c(0, 30, 50)
+  incursion$set_values(x) # 3
+  expect_equal(impacts$incursion_impacts(raw = TRUE),
+               list(aspect1 = 100*30*0.3, aspect2 = 200*30*0.4))
+  attr(attr(x, "recovery_delay"), "incursions") <- c(0, 0, 30, 50)
+  incursion$set_values(x) # 4
+  expect_equal(impacts$incursion_impacts(raw = TRUE),
+               list(aspect1 = 0, aspect2 = 0))
 })

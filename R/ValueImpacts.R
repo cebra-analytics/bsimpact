@@ -53,10 +53,10 @@
 #'       consistent with region, or vectors when \code{raw = TRUE}. When
 #'       discount rates are specified, the impact will be calculated based on
 #'       future values at the time interval \code{time_int} (when provided).
-#'       Incursions of type \code{"presence"} may also define a recovery delay
-#'       via a \code{recovery_delay} attribute attached to the population
-#'       vector (see \code{bsmanage::ManageImpacts}), which prolongs calculated
-#'       impacts after removed or extirpated local populations.}
+#'       Incursions of type \code{"presence"} or \code{"area"} may also define
+#'       a recovery delay via a \code{recovery_delay} attribute attached to the
+#'       population vector (see \code{bsmanage::ManageImpacts}), which prolongs
+#'       calculated impacts after removed or extirpated local populations.}
 #'     \item{\code{combined_impacts(raw = FALSE)}}{Combine (likely) incursion
 #'       impacts across aspects of the environment, society, and/or economy, to
 #'       produce an overall impact (damage or loss) at each location. Returns
@@ -233,15 +233,27 @@ ValueImpacts.Context <- function(context,
 
       # Recovery delays prolong impacts
       id <- self$get_id()
-      if (incursion$get_type() == "presence" &&
+      if (incursion$get_type() %in% c("presence", "area") &&
           is.list(attr(impact_incursion, "recovery_delay"))) {
         if (length(attr(impact_incursion, "recovery_delay")) >= id &&
             is.numeric(attr(impact_incursion, "recovery_delay")[[id]])) {
-        impact_incursion <-
-          +(impact_incursion > 0 |
-              attr(impact_incursion, "recovery_delay")[[id]] > 0)
+          if (incursion$get_type() == "presence") {
+            impact_incursion <-
+              +(impact_incursion > 0 |
+                  attr(impact_incursion, "recovery_delay")[[id]] > 0)
+          } else if (incursion$get_type() == "area") {
+            delay <- attr(impact_incursion, "recovery_delay")[[id]]
+            prev_incursions <- attr(attr(impact_incursion, "recovery_delay"),
+                                    "incursions")
+            impact_incursion <- max(impact_incursion, prev_incursions[1:delay],
+                                    na.rm = TRUE)
+          }
         } else {
-          impact_incursion <- +(impact_incursion > 0)
+          if (incursion$get_type() == "presence") {
+            impact_incursion <- +(impact_incursion > 0)
+          } else if (incursion$get_type() == "area") {
+            impact_incursion <- as.numeric(impact_incursion)
+          }
         }
       }
 
@@ -262,8 +274,8 @@ ValueImpacts.Context <- function(context,
       incursion_impacts <<- list()
       for (aspect in names(impact_layers)) {
         incursion_impacts[[aspect]] <<-
-          (impact_layers[[aspect]]*loss_rates[aspect]*impact_incursion*
-             disc_mult[aspect])
+          as.numeric(impact_layers[[aspect]]*loss_rates[aspect]*
+                       impact_incursion*disc_mult[aspect])
       }
 
       # Place in spatial rasters when grid region
