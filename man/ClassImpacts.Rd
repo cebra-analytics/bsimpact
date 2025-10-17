@@ -73,6 +73,8 @@ and management costs (optional):
 \describe{
 \item{\code{get_context()}}{Get context object.}
 \item{\code{get_incursion()}}{Get incursion object.}
+\item{\code{get_id()}}{Get the impacts numeric identifier.}
+\item{\code{set_id(id)}}{Set the impacts numeric identifier.}
 \item{\code{incursion_impacts(raw = FALSE)}}{Classify (likely)
 incursion impacts for each aspect of the environment, society, and/or
 economy. Returns results consistent with region, or vectors when

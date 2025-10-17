@@ -235,26 +235,39 @@ ValueImpacts.Context <- function(context,
 
       # Recovery delays prolong impacts
       id <- self$get_id()
-      if (incursion$get_type() %in% c("presence", "area") &&
+      if (incursion$get_type() %in% c("presence", "density", "area") &&
           is.list(attr(impact_incursion, "recovery_delay"))) {
         if (length(attr(impact_incursion, "recovery_delay")) >= id &&
             is.numeric(attr(impact_incursion, "recovery_delay")[[id]])) {
-          if (incursion$get_type() == "presence") {
+          if (incursion$get_type() == "presence") { # decremented delays
             impact_incursion <-
               +(impact_incursion > 0 |
                   attr(impact_incursion, "recovery_delay")[[id]] > 0)
+          } else if (incursion$get_type() == "density") {
+            delay <- attr(impact_incursion, "recovery_delay")[[id]]
+            prev_incursions <- attr(attr(impact_incursion, "recovery_delay"),
+                                    "incursions")
+            impact_incursion <- as.numeric(impact_incursion)
+            if (delay > 0 && length(prev_incursions) > 0) {
+              for (i in 1:min(length(prev_incursions), delay)) {
+                impact_incursion <- pmax(impact_incursion,
+                                         prev_incursions[[i]])
+              }
+            }
           } else if (incursion$get_type() == "area") {
             delay <- attr(impact_incursion, "recovery_delay")[[id]]
             prev_incursions <- attr(attr(impact_incursion, "recovery_delay"),
                                     "incursions")
-            impact_incursion <- max(impact_incursion, prev_incursions[1:delay],
-                                    na.rm = TRUE)
+            impact_incursion <- as.numeric(impact_incursion)
+            if (delay > 0 && length(prev_incursions) > 0) {
+              impact_incursion <- max(impact_incursion,
+                                      prev_incursions[1:delay], na.rm = TRUE)
+            }
           }
         } else {
+          impact_incursion <- as.numeric(impact_incursion)
           if (incursion$get_type() == "presence") {
             impact_incursion <- +(impact_incursion > 0)
-          } else if (incursion$get_type() == "area") {
-            impact_incursion <- as.numeric(impact_incursion)
           }
         }
       }
