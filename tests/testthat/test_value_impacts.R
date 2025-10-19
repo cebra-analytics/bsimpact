@@ -244,6 +244,60 @@ test_that("applies recovery delay to prolong impacts", {
       (impact_layers[[a]][region$get_indices()][,1]*loss_rates[a]*
          x_with_delay)})
   expect_equal(impacts$incursion_impacts(raw = TRUE), expected_impacts)
+  # density-based impacts
+  template_vect <- template[region$get_indices()][,1]
+  idx <- 5901:6000
+  incursion <- Incursion(template*0, region, type = "density")
+  aspects <- list(aspect1 = "aspect1", aspect2 = "aspect2")
+  impact_layers <- list(aspect1 = 100*(template > 0.1 & template < 0.4),
+                        aspect2 = 200*(template > 0.3))
+  expect_silent(impacts <- ValueImpacts(context, region, incursion,
+                                        impact_layers,
+                                        loss_rates = loss_rates))
+  expect_silent(impacts$set_id(2))
+  n_density <- n <- rep(0, region$get_locations())
+  n[idx] <- round(runif(100, 1, 10))
+  dens_idx <- idx[which(template_vect[idx] > 0)]
+  n_density[dens_idx] <- pmin(n[dens_idx]/(template_vect[dens_idx]*50), 1)
+  expected_impacts <- lapply(aspects, function(l) {
+    n_density*impact_layers[[l]][region$get_indices()][,1]*loss_rates[l]
+  })
+  x <- n_density
+  incursion$set_values(x) # 0
+  expect_equal(impacts$incursion_impacts(raw = TRUE), expected_impacts)
+  attr(x, "recovery_delay") <- list(3, 2)
+  attr(attr(x, "recovery_delay"), "incursions") <- list(n_density)
+  x[idx[1:10]] <- 0
+  x[idx[11:20]] <- x[idx[11:20]]*0.6
+  mask1 <- +(x > 0)
+  mask1[idx[11:20]] <- mask1[idx[11:20]]*0.6
+  incursion$set_values(x) # 1
+  expect_equal(impacts$incursion_impacts(raw = TRUE), expected_impacts)
+  attr(attr(x, "recovery_delay"), "incursions") <-
+    list(mask1*n_density, n_density)
+  x[idx[11:30]] <- 0
+  mask2 <- +(x > 0)
+  incursion$set_values(x) # 2
+  expect_equal(impacts$incursion_impacts(raw = TRUE), expected_impacts)
+  attr(attr(x, "recovery_delay"), "incursions") <-
+    list(mask2*n_density, mask1*n_density, n_density)
+  mask3 <- +(x > 0)
+  expected_impacts <- lapply(expected_impacts, function(impact) {
+    impact[idx[1:10]] <- 0
+    impact[idx[11:20]] <- impact[idx[11:20]]*0.6
+    impact
+  })
+  incursion$set_values(x) # 3
+  expect_equal(impacts$incursion_impacts(raw = TRUE), expected_impacts)
+  attr(attr(x, "recovery_delay"), "incursions") <-
+    list(mask3*n_density, mask2*n_density, mask1*n_density)
+  x[idx[21:30]] <- n_density[idx[21:30]]
+  expected_impacts <- lapply(expected_impacts, function(impact) {
+    impact[idx[11:20]] <- 0
+    impact
+  })
+  incursion$set_values(x) # 4
+  expect_equal(impacts$incursion_impacts(raw = TRUE), expected_impacts)
   # spatially implicit area-based impacts
   region <- Region()
   incursion <- Incursion(0, region, type = "area")
