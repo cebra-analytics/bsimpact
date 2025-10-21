@@ -23,6 +23,12 @@
 #' @param loss_rates A vector of value loss rates for each named aspect
 #'   (mechanism, service, sector, asset type, etc.) specified via the impact
 #'   scope in the \code{context}.
+#' @param is_dynamic An optional logical to indicate that the impacts of threat
+#'    occurrences are calculated via dynamic reductions in asset value using
+#'    the specified loss rates. Dynamic impacts or value losses continually
+#'    increase whilst the threat is present and persist until recovered.
+#'    Default is \code{FALSE} for time-based monetary values or static
+#'    non-monetary values.
 #' @param discount_rates An optional named vector of discount rates (per time
 #'   interval) for the impacted values to estimate future values that account
 #'   for inflation. Typically the discounting uses market interest rates.
@@ -139,6 +145,7 @@ ValueImpacts <- function(context,
                          incursion,
                          impact_layers,
                          loss_rates,
+                         is_dynamic = FALSE,
                          discount_rates = NULL,
                          combine_function = c("sum", "none"),
                          mgmt_costs = NULL, ...) {
@@ -152,6 +159,7 @@ ValueImpacts.Context <- function(context,
                                  incursion,
                                  impact_layers,
                                  loss_rates,
+                                 is_dynamic = FALSE,
                                  discount_rates = NULL,
                                  combine_function = c("sum", "none"),
                                  mgmt_costs = NULL, ...) {
@@ -200,6 +208,12 @@ ValueImpacts.Context <- function(context,
     names(loss_rates) <- context$get_impact_scope()
     message(paste("Unnamed loss rates assumed to be in order consistent with",
                   "the context impact scope."))
+  }
+
+  # Check dynamic indicator
+  if (!is.logical(is_dynamic)) {
+    stop("The dynamic indicator must be logical TRUE or FALSE.",
+         call. = FALSE)
   }
 
   # Check discount rates

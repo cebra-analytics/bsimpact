@@ -51,10 +51,13 @@ test_that("sets incursion values", {
   expect_silent(incursion$set_values(0.8*original_x))
   expect_equal(incursion$get_impact_incursion(), 0.8*original_x)
   attr(original_x, "recovery_delay") <- rep(3, region$get_locations())
+  attr(original_x, "dynamic_mult") <- rep(0.6, region$get_locations())
   expect_silent(incursion$set_values(original_x))
   expect_equal(incursion$get_impact_incursion(), original_x)
   expect_equal(attr(incursion$get_impact_incursion(), "recovery_delay"),
                attr(original_x, "recovery_delay"))
+  expect_equal(attr(incursion$get_impact_incursion(), "dynamic_mult"),
+               attr(original_x, "dynamic_mult"))
 })
 
 test_that("handles area incursions", {

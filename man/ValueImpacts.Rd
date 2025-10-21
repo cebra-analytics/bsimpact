@@ -11,6 +11,7 @@ ValueImpacts(
   incursion,
   impact_layers,
   loss_rates,
+  is_dynamic = FALSE,
   discount_rates = NULL,
   combine_function = c("sum", "none"),
   mgmt_costs = NULL,
@@ -23,6 +24,7 @@ ValueImpacts(
   incursion,
   impact_layers,
   loss_rates,
+  is_dynamic = FALSE,
   discount_rates = NULL,
   combine_function = c("sum", "none"),
   mgmt_costs = NULL,
@@ -52,6 +54,13 @@ expressed as value per metres squared.}
 \item{loss_rates}{A vector of value loss rates for each named aspect
 (mechanism, service, sector, asset type, etc.) specified via the impact
 scope in the \code{context}.}
+
+\item{is_dynamic}{An optional logical to indicate that the impacts of threat
+occurrences are calculated via dynamic reductions in asset value using
+the specified loss rates. Dynamic impacts or value losses continually
+increase whilst the threat is present and persist until recovered.
+Default is \code{FALSE} for time-based monetary values or static
+non-monetary values.}
 
 \item{discount_rates}{An optional named vector of discount rates (per time
 interval) for the impacted values to estimate future values that account

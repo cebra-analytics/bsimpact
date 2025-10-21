@@ -35,6 +35,9 @@ test_that("initializes with parameters", {
     paste("Unnamed loss rates assumed to be in order consistent with the",
           "context impact scope."))
   expect_error(ValueImpacts(context, region, incursion, impact_layers,
+                            loss_rates = loss_rates, is_dynamic = 3),
+               "The dynamic indicator must be logical TRUE or FALSE.")
+  expect_error(ValueImpacts(context, region, incursion, impact_layers,
                             loss_rates = loss_rates,
                             discount_rates = c(a = 0.05)),
                paste("Discount rates must be numeric, >= 0, <= 1, and named",
