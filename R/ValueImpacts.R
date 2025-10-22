@@ -23,12 +23,12 @@
 #' @param loss_rates A vector of value loss rates for each named aspect
 #'   (mechanism, service, sector, asset type, etc.) specified via the impact
 #'   scope in the \code{context}.
-#' @param is_dynamic An optional logical to indicate that the impacts of threat
-#'    occurrences are calculated via dynamic reductions in asset value using
-#'    the specified loss rates. Dynamic impacts or value losses continually
-#'    increase whilst the threat is present and persist until recovered.
-#'    Default is \code{FALSE} for time-based monetary values or static
-#'    non-monetary values.
+#' @param is_dynamic An optional logical to indicate that the impacts of
+#'   threat occurrences are calculated via dynamic reductions in asset value
+#'   using the specified loss rates. Dynamic impacts or value losses
+#'   continually increase whilst the threat is present and persist until
+#'   recovered. Default is \code{FALSE} for time-based monetary impacts or
+#'   static non-monetary impacts.
 #' @param discount_rates An optional named vector of discount rates (per time
 #'   interval) for the impacted values to estimate future values that account
 #'   for inflation. Typically the discounting uses market interest rates.
@@ -247,8 +247,42 @@ ValueImpacts.Context <- function(context,
       # Get impact incursion values
       impact_incursion <- incursion$get_impact_incursion()
 
-      # Recovery delays prolong impacts
+      # Identifier
       id <- self$get_id()
+
+      # Calculate dynamic multipliers
+      if (is_dynamic) {
+        if (is.list(attr(impact_incursion, "dynamic_mult")) &&
+            length(attr(impact_incursion, "dynamic_mult")) >= id &&
+            is.list(attr(impact_incursion, "dynamic_mult")[[id]])) {
+          dynamic_mult <- attr(impact_incursion, "dynamic_mult")[[id]]
+        } else {
+          dynamic_mult <- lapply(impact_layers, function(i) 1)
+        }
+        if (incursion$get_type() == "area") {
+          for (aspect in names(impact_layers)) {
+            if (is.numeric(attr(dynamic_mult, "incursion"))) {
+              prev_loss <- min(attr(dynamic_mult, "incursion"),
+                               impact_incursion)*(1 - dynamic_mult[[aspect]])
+              dynamic_mult[[aspect]] <-
+                (impact_incursion -
+                   ((impact_incursion - prev_loss)*loss_rates[aspect] +
+                      prev_loss))/impact_incursion # TODO handle /0 ####
+            } else {
+              dynamic_mult[[aspect]] <- 1 - loss_rates[aspect]
+            }
+            attr(dynamic_mult, "incursion") <- impact_incursion
+          }
+        } else {
+          for (aspect in names(impact_layers)) {
+            dynamic_mult[[aspect]] <-
+              dynamic_mult[[aspect]]*(1 - impact_incursion*loss_rates[aspect])
+          }
+        }
+        attr(dynamic_mult, "id") <- id
+      }
+
+      # Recovery delays prolong impacts # TODO - check dynamic ####
       if (incursion$get_type() %in% c("presence", "density", "area") &&
           is.list(attr(impact_incursion, "recovery_delay"))) {
         if (length(attr(impact_incursion, "recovery_delay")) >= id &&
@@ -299,7 +333,7 @@ ValueImpacts.Context <- function(context,
         disc_mult <- 1/(1 + discount_rates)^time_int
       }
 
-      # Calculate incursion impacts
+      # Calculate incursion impacts # TODO - update dynamic ####
       incursion_impacts <<- list()
       for (aspect in names(impact_layers)) {
         incursion_impacts[[aspect]] <<-
@@ -314,6 +348,11 @@ ValueImpacts.Context <- function(context,
             region$get_rast(incursion_impacts[[aspect]])
         }
       }
+    }
+
+    # Attach dynamic multipliers
+    if (is_dynamic) {
+      attr(incursion_impacts, "dynamic_mult") <- dynamic_mult
     }
 
     return(incursion_impacts)

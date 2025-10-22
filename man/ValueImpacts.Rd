@@ -55,12 +55,12 @@ expressed as value per metres squared.}
 (mechanism, service, sector, asset type, etc.) specified via the impact
 scope in the \code{context}.}
 
-\item{is_dynamic}{An optional logical to indicate that the impacts of threat
-occurrences are calculated via dynamic reductions in asset value using
-the specified loss rates. Dynamic impacts or value losses continually
-increase whilst the threat is present and persist until recovered.
-Default is \code{FALSE} for time-based monetary values or static
-non-monetary values.}
+\item{is_dynamic}{An optional logical to indicate that the impacts of
+threat occurrences are calculated via dynamic reductions in asset value
+using the specified loss rates. Dynamic impacts or value losses
+continually increase whilst the threat is present and persist until
+recovered. Default is \code{FALSE} for time-based monetary impacts or
+static non-monetary impacts.}
 
 \item{discount_rates}{An optional named vector of discount rates (per time
 interval) for the impacted values to estimate future values that account
