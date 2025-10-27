@@ -90,6 +90,7 @@ for calculating and combining invasive species (likely) incursion impacts,
 management costs (optional), and total costs (when applicable):
 \describe{
 \item{\code{get_context()}}{Get context object.}
+\item{\code{get_is_dynamic()}}{Get indicator for dynamic impacts.}
 \item{\code{get_incursion()}}{Get incursion object.}
 \item{\code{get_id()}}{Get the impacts numeric identifier.}
 \item{\code{set_id(id)}}{Set the impacts numeric identifier.}
@@ -99,10 +100,11 @@ aspect of the environment, society, and/or economy. Returns results
 consistent with region, or vectors when \code{raw = TRUE}. When
 discount rates are specified, the impact will be calculated based on
 future values at the time interval \code{time_int} (when provided).
-Incursions of type \code{"presence"} or \code{"area"} may also define
-a recovery delay via a \code{recovery_delay} attribute attached to the
-population vector (see \code{bsmanage::ManageImpacts}), which prolongs
-calculated impacts after removed or extirpated local populations.}
+Incursions of type \code{"presence"}, \code{"density"}, or
+\code{"area"} may also define a recovery delay via a
+\code{recovery_delay} attribute attached to the population vector
+(see \code{bsmanage::ManageImpacts}), which prolongs calculated
+impacts after removed or extirpated local populations.}
 \item{\code{combined_impacts(raw = FALSE)}}{Combine (likely) incursion
 impacts across aspects of the environment, society, and/or economy, to
 produce an overall impact (damage or loss) at each location. Returns

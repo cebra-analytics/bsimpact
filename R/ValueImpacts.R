@@ -52,6 +52,7 @@
 #'   management costs (optional), and total costs (when applicable):
 #'   \describe{
 #'     \item{\code{get_context()}}{Get context object.}
+#'     \item{\code{get_is_dynamic()}}{Get indicator for dynamic impacts.}
 #'     \item{\code{get_incursion()}}{Get incursion object.}
 #'     \item{\code{get_id()}}{Get the impacts numeric identifier.}
 #'     \item{\code{set_id(id)}}{Set the impacts numeric identifier.}
@@ -61,10 +62,11 @@
 #'       consistent with region, or vectors when \code{raw = TRUE}. When
 #'       discount rates are specified, the impact will be calculated based on
 #'       future values at the time interval \code{time_int} (when provided).
-#'       Incursions of type \code{"presence"} or \code{"area"} may also define
-#'       a recovery delay via a \code{recovery_delay} attribute attached to the
-#'       population vector (see \code{bsmanage::ManageImpacts}), which prolongs
-#'       calculated impacts after removed or extirpated local populations.}
+#'       Incursions of type \code{"presence"}, \code{"density"}, or
+#'       \code{"area"} may also define a recovery delay via a
+#'       \code{recovery_delay} attribute attached to the population vector
+#'       (see \code{bsmanage::ManageImpacts}), which prolongs calculated
+#'       impacts after removed or extirpated local populations.}
 #'     \item{\code{combined_impacts(raw = FALSE)}}{Combine (likely) incursion
 #'       impacts across aspects of the environment, society, and/or economy, to
 #'       produce an overall impact (damage or loss) at each location. Returns
@@ -275,11 +277,10 @@ ValueImpacts.Context <- function(context,
           }
         } else {
           for (aspect in names(impact_layers)) {
-            dynamic_mult[[aspect]] <-
-              dynamic_mult[[aspect]]*(1 - impact_incursion*loss_rates[aspect])
+            dynamic_mult[[aspect]] <- dynamic_mult[[aspect]]*(
+              1 - as.numeric(impact_incursion)*loss_rates[aspect])
           }
         }
-        attr(dynamic_mult, "id") <- id
       }
 
       # Recovery delays prolong impacts # TODO - check dynamic ####
@@ -287,7 +288,14 @@ ValueImpacts.Context <- function(context,
           is.list(attr(impact_incursion, "recovery_delay"))) {
         if (length(attr(impact_incursion, "recovery_delay")) >= id &&
             is.numeric(attr(impact_incursion, "recovery_delay")[[id]])) {
-          if (incursion$get_type() == "presence") { # decremented delays
+          if (is_dynamic && # decremented delays
+              incursion$get_type() %in% c("presence", "density")) {
+            delay <- attr(impact_incursion, "recovery_delay")[[id]]
+            dynamic_mult <- lapply(dynamic_mult, function(mult) {
+              ((impact_incursion > 0 | delay > 0)*mult +
+                 (impact_incursion == 0 & delay == 0))
+            })
+          } else if (incursion$get_type() == "presence") { # decremented delays
             impact_incursion <-
               +(impact_incursion > 0 |
                   attr(impact_incursion, "recovery_delay")[[id]] > 0)
@@ -318,6 +326,11 @@ ValueImpacts.Context <- function(context,
             impact_incursion <- +(impact_incursion > 0)
           }
         }
+      } else if (is_dynamic && # no delay on recovery
+                 is.null(attr(impact_incursion, "recovery_delay"))) {
+        dynamic_mult <- lapply(dynamic_mult, function(mult) {
+          (impact_incursion > 0)*mult + (impact_incursion == 0)
+        })
       }
 
       # Extract spatial raster impact layer values
@@ -336,9 +349,15 @@ ValueImpacts.Context <- function(context,
       # Calculate incursion impacts # TODO - update dynamic ####
       incursion_impacts <<- list()
       for (aspect in names(impact_layers)) {
-        incursion_impacts[[aspect]] <<-
-          as.numeric(impact_layers[[aspect]]*loss_rates[aspect]*
-                       impact_incursion*disc_mult[aspect])
+        if (is_dynamic) {
+          incursion_impacts[[aspect]] <<-
+            as.numeric(impact_layers[[aspect]]*disc_mult[aspect]*
+                         (1 - dynamic_mult[[aspect]]))
+        } else {
+          incursion_impacts[[aspect]] <<-
+            as.numeric(impact_layers[[aspect]]*loss_rates[aspect]*
+                         impact_incursion*disc_mult[aspect])
+        }
       }
 
       # Place in spatial rasters when grid region

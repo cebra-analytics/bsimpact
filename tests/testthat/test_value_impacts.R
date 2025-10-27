@@ -333,3 +333,142 @@ test_that("applies recovery delay to prolong impacts", {
   expect_equal(impacts$incursion_impacts(raw = TRUE),
                list(aspect1 = 0, aspect2 = 0))
 })
+
+test_that("applies dynamic impacts", {
+  TEST_DIRECTORY <- test_path("test_inputs")
+  context <- Context("My species", impact_scope = c("aspect1", "aspect2"))
+  template <- terra::rast(file.path(TEST_DIRECTORY, "greater_melb.tif"))
+  region <- Region(template*0)
+  template_vect <- template[region$get_indices()][,1]
+  idx <- 5901:6000
+  incursion <- Incursion(template > 0, region)
+  aspects <- list(aspect1 = "aspect1", aspect2 = "aspect2")
+  impact_layers <- list(aspect1 = 100*(template > 0.1 & template < 0.4),
+                        aspect2 = 200*(template > 0.3))
+  loss_rates = c(aspect1 = 0.3, aspect2 = 0.4)
+  expect_silent(impacts <- ValueImpacts(context, region, incursion,
+                                        impact_layers,
+                                        loss_rates = loss_rates,
+                                        is_dynamic = TRUE))
+  x <- incursion$get_impact_incursion()
+  expect_silent(impacts$set_id(2))
+  x[idx[1:10]] <- 0
+  incursion$set_values(x)
+  expected_impacts <-
+    lapply(aspects, function(a) {
+      (impact_layers[[a]][region$get_indices()][,1]*loss_rates[a]*x)})
+  expected_dynamic_mult <-
+    lapply(aspects, function(a) (1 - loss_rates[a]*x))
+  attr(expected_impacts, "dynamic_mult") <- expected_dynamic_mult
+  expect_silent(calc_impacts <- impacts$incursion_impacts(raw = TRUE))
+  expect_equal(calc_impacts, expected_impacts)
+  expect_equal(attr(calc_impacts, "dynamic_mult"),
+               attr(expected_impacts, "dynamic_mult"))
+  x[idx[1:10]] <- 1
+  x[idx[11:20]] <- 0
+  attr(x, "dynamic_mult") <- list(NULL, attr(expected_impacts, "dynamic_mult"))
+  incursion$set_values(x)
+  expected_dynamic_mult <- lapply(aspects, function(a) {
+    dynamic_mult <- expected_dynamic_mult[[a]]*(1 - loss_rates[a]*as.numeric(x))
+    dynamic_mult[which(x == 0)] <- 1
+    dynamic_mult
+  })
+  expected_impacts <-
+    lapply(aspects, function(a) {
+      (impact_layers[[a]][region$get_indices()][,1]*(1 - expected_dynamic_mult[[a]]))})
+  attr(expected_impacts, "dynamic_mult") <- expected_dynamic_mult
+  expect_silent(calc_impacts <- impacts$incursion_impacts(raw = TRUE))
+  expect_equal(calc_impacts, expected_impacts)
+  expect_equal(attr(calc_impacts, "dynamic_mult"),
+               attr(expected_impacts, "dynamic_mult"))
+  # density-based impacts with recovery delay
+  incursion <- Incursion(template*0, region, type = "density")
+  expect_silent(impacts <- ValueImpacts(context, region, incursion,
+                                        impact_layers,
+                                        loss_rates = loss_rates,
+                                        is_dynamic = TRUE))
+  x <- incursion$get_impact_incursion()
+  expect_silent(impacts$set_id(2))
+  n_density <- n <- rep(0, region$get_locations())
+  n[idx] <- round(runif(100, 1, 10))
+  dens_idx <- idx[which(template_vect[idx] > 0)]
+  n_density[dens_idx] <- pmin(n[dens_idx]/(template_vect[dens_idx]*50), 1)
+  x <- n_density
+  expected_impacts <-
+    lapply(aspects, function(a) {
+      (impact_layers[[a]][region$get_indices()][,1]*loss_rates[a]*x)})
+  expected_dynamic_mult <-
+    lapply(aspects, function(a) (1 - loss_rates[a]*x))
+  attr(expected_impacts, "dynamic_mult") <- expected_dynamic_mult
+  incursion$set_values(x) # 0
+  expect_silent(calc_impacts <- impacts$incursion_impacts(raw = TRUE))
+  expect_equal(calc_impacts, expected_impacts)
+  expect_equal(attr(calc_impacts, "dynamic_mult"),
+               attr(expected_impacts, "dynamic_mult"))
+  attr(x, "dynamic_mult") <- list(NULL, attr(calc_impacts, "dynamic_mult"))
+  attr(x, "recovery_delay") <- list(NULL, rep(0, region$get_locations()))
+  attr(x, "recovery_delay")[[2]][which(x > 0)] <- 2
+  x[idx[1:10]] <- 0
+  x[idx[11:20]] <- x[idx[11:20]]*0.6
+  incursion$set_values(x) # 1
+  expected_dynamic_mult <- lapply(aspects, function(a) {
+    expected_dynamic_mult[[a]]*(1 - loss_rates[a]*as.numeric(x))
+  })
+  expected_impacts <-
+    lapply(aspects, function(a) {
+      (impact_layers[[a]][region$get_indices()][,1]*(1 - expected_dynamic_mult[[a]]))})
+  attr(expected_impacts, "dynamic_mult") <- expected_dynamic_mult
+  expect_silent(calc_impacts <- impacts$incursion_impacts(raw = TRUE))
+  expect_equal(calc_impacts, expected_impacts)
+  expect_equal(attr(calc_impacts, "dynamic_mult"),
+               attr(expected_impacts, "dynamic_mult"))
+  attr(x, "dynamic_mult")[[2]] <- attr(calc_impacts, "dynamic_mult")
+  attr(x, "recovery_delay")[[2]][idx[1:10]] <- 1
+  x[idx[11:30]] <- 0
+  incursion$set_values(x) # 2
+  expected_dynamic_mult <- lapply(aspects, function(a) {
+    expected_dynamic_mult[[a]]*(1 - loss_rates[a]*as.numeric(x))
+  })
+  expected_impacts <-
+    lapply(aspects, function(a) {
+      (impact_layers[[a]][region$get_indices()][,1]*(1 - expected_dynamic_mult[[a]]))})
+  attr(expected_impacts, "dynamic_mult") <- expected_dynamic_mult
+  expect_silent(calc_impacts <- impacts$incursion_impacts(raw = TRUE))
+  expect_equal(calc_impacts, expected_impacts)
+  expect_equal(attr(calc_impacts, "dynamic_mult"),
+               attr(expected_impacts, "dynamic_mult"))
+  attr(x, "dynamic_mult")[[2]] <- attr(calc_impacts, "dynamic_mult")
+  attr(x, "recovery_delay")[[2]][idx[1:30]] <- pmax(attr(x, "recovery_delay")[[2]][idx[1:30]] - 1, 0)
+  incursion$set_values(x) # 3
+  expected_dynamic_mult <- lapply(aspects, function(a) {
+    expected <- expected_dynamic_mult[[a]]*(1 - loss_rates[a]*as.numeric(x))
+    expected[idx[1:10]] <- 1
+    expected
+  })
+  expected_impacts <-
+    lapply(aspects, function(a) {
+      (impact_layers[[a]][region$get_indices()][,1]*(1 - expected_dynamic_mult[[a]]))})
+  attr(expected_impacts, "dynamic_mult") <- expected_dynamic_mult
+  expect_silent(calc_impacts <- impacts$incursion_impacts(raw = TRUE))
+  expect_equal(calc_impacts, expected_impacts)
+  expect_equal(attr(calc_impacts, "dynamic_mult"),
+               attr(expected_impacts, "dynamic_mult"))
+  attr(x, "dynamic_mult")[[2]] <- attr(calc_impacts, "dynamic_mult")
+  attr(x, "recovery_delay")[[2]][idx[1:30]] <- pmax(attr(x, "recovery_delay")[[2]][idx[1:30]] - 1, 0)
+  x[idx[21:30]] <- n_density[idx[21:30]]
+  incursion$set_values(x) # 4
+  expected_dynamic_mult <- lapply(aspects, function(a) {
+    expected <- expected_dynamic_mult[[a]]*(1 - loss_rates[a]*as.numeric(x))
+    expected[idx[11:20]] <- 1
+    expected
+  })
+  expected_impacts <-
+    lapply(aspects, function(a) {
+      (impact_layers[[a]][region$get_indices()][,1]*(1 - expected_dynamic_mult[[a]]))})
+  attr(expected_impacts, "dynamic_mult") <- expected_dynamic_mult
+  expect_silent(calc_impacts <- impacts$incursion_impacts(raw = TRUE))
+  expect_equal(calc_impacts, expected_impacts)
+  expect_equal(attr(calc_impacts, "dynamic_mult"),
+               attr(expected_impacts, "dynamic_mult"))
+})
+
