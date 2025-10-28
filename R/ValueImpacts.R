@@ -258,22 +258,25 @@ ValueImpacts.Context <- function(context,
             length(attr(impact_incursion, "dynamic_mult")) >= id &&
             is.list(attr(impact_incursion, "dynamic_mult")[[id]])) {
           dynamic_mult <- attr(impact_incursion, "dynamic_mult")[[id]]
+          attr(dynamic_mult, "incursion") <-
+            attr(attr(impact_incursion, "dynamic_mult"), "incursion")
         } else {
           dynamic_mult <- lapply(impact_layers, function(i) 1)
         }
         if (incursion$get_type() == "area") {
+          prev_area <- attr(dynamic_mult, "incursion")
+          incursion_area <- as.numeric(impact_incursion)
           for (aspect in names(impact_layers)) {
-            if (is.numeric(attr(dynamic_mult, "incursion"))) {
-              prev_loss <- min(attr(dynamic_mult, "incursion"),
-                               impact_incursion)*(1 - dynamic_mult[[aspect]])
+            if (is.numeric(prev_area) && prev_area < incursion_area &&
+                incursion_area > 0) {
+              prev_loss <- prev_area*(1 - dynamic_mult[[aspect]])
               dynamic_mult[[aspect]] <-
-                (impact_incursion -
-                   ((impact_incursion - prev_loss)*loss_rates[aspect] +
-                      prev_loss))/impact_incursion # TODO handle /0 ####
+                ((incursion_area - prev_loss)*(1 - loss_rates[aspect])/
+                   incursion_area)
             } else {
-              dynamic_mult[[aspect]] <- 1 - loss_rates[aspect]
+              dynamic_mult[[aspect]] <-
+                dynamic_mult[[aspect]]*(1 - loss_rates[aspect])
             }
-            attr(dynamic_mult, "incursion") <- impact_incursion
           }
         } else {
           for (aspect in names(impact_layers)) {
@@ -281,6 +284,7 @@ ValueImpacts.Context <- function(context,
               1 - as.numeric(impact_incursion)*loss_rates[aspect])
           }
         }
+        dynamic_mult <- lapply(dynamic_mult, unname)
       }
 
       # Recovery delays prolong impacts # TODO - check dynamic ####
@@ -315,7 +319,20 @@ ValueImpacts.Context <- function(context,
             prev_incursions <- attr(attr(impact_incursion, "recovery_delay"),
                                     "incursions")
             impact_incursion <- as.numeric(impact_incursion)
-            if (delay > 0 && length(prev_incursions) > 0) {
+            if (is_dynamic && is.list(attr(delay, "dynamic_mult"))) {
+              dynamic_incursion <- lapply(dynamic_mult, function(mult) {
+                mult <- (impact_incursion > 0)*mult + (impact_incursion == 0)
+                (1 - mult)*impact_incursion
+              })
+              if (delay > 0 && length(prev_incursions) > 0) {
+                for (i in 1:length(dynamic_incursion)) {
+                  prev_mult <- attr(delay, "dynamic_mult")[[i]]
+                  dynamic_incursion[[i]] <- max(
+                    dynamic_incursion[[i]],
+                    ((1 - prev_mult)*prev_incursions)[1:delay], na.rm = TRUE)
+                }
+              }
+            } else if (delay > 0 && length(prev_incursions) > 0) {
               impact_incursion <- max(impact_incursion,
                                       prev_incursions[1:delay], na.rm = TRUE)
             }
@@ -329,8 +346,13 @@ ValueImpacts.Context <- function(context,
       } else if (is_dynamic && # no delay on recovery
                  is.null(attr(impact_incursion, "recovery_delay"))) {
         dynamic_mult <- lapply(dynamic_mult, function(mult) {
-          (impact_incursion > 0)*mult + (impact_incursion == 0)
+          unname((impact_incursion > 0)*mult + (impact_incursion == 0))
         })
+        if (incursion$get_type() == "area") {
+          dynamic_incursion <- lapply(dynamic_mult, function(mult) {
+            (1 - mult)*impact_incursion
+          })
+        }
       }
 
       # Extract spatial raster impact layer values
@@ -350,9 +372,16 @@ ValueImpacts.Context <- function(context,
       incursion_impacts <<- list()
       for (aspect in names(impact_layers)) {
         if (is_dynamic) {
-          incursion_impacts[[aspect]] <<-
-            as.numeric(impact_layers[[aspect]]*disc_mult[aspect]*
-                         (1 - dynamic_mult[[aspect]]))
+          if (incursion$get_type() == "area") {
+            incursion_impacts[[aspect]] <<-
+              as.numeric(impact_layers[[aspect]]*disc_mult[aspect]*
+                           dynamic_incursion[[aspect]])
+
+          } else {
+            incursion_impacts[[aspect]] <<-
+              as.numeric(impact_layers[[aspect]]*disc_mult[aspect]*
+                           (1 - dynamic_mult[[aspect]]))
+          }
         } else {
           incursion_impacts[[aspect]] <<-
             as.numeric(impact_layers[[aspect]]*loss_rates[aspect]*
