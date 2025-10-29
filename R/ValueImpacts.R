@@ -266,16 +266,17 @@ ValueImpacts.Context <- function(context,
         if (incursion$get_type() == "area") {
           prev_area <- attr(dynamic_mult, "incursion")
           incursion_area <- as.numeric(impact_incursion)
-          for (aspect in names(impact_layers)) {
-            if (is.numeric(prev_area) && prev_area < incursion_area &&
-                incursion_area > 0) {
-              prev_loss <- prev_area*(1 - dynamic_mult[[aspect]])
-              dynamic_mult[[aspect]] <-
-                ((incursion_area - prev_loss)*(1 - loss_rates[aspect])/
-                   incursion_area)
-            } else {
-              dynamic_mult[[aspect]] <-
-                dynamic_mult[[aspect]]*(1 - loss_rates[aspect])
+          if (incursion_area > 0) {
+            for (aspect in names(impact_layers)) {
+              if (is.numeric(prev_area) && prev_area < incursion_area) {
+                prev_loss <- prev_area*(1 - dynamic_mult[[aspect]])
+                dynamic_mult[[aspect]] <-
+                  ((incursion_area - prev_loss)*(1 - loss_rates[aspect])/
+                     incursion_area)
+              } else {
+                dynamic_mult[[aspect]] <-
+                  dynamic_mult[[aspect]]*(1 - loss_rates[aspect])
+              }
             }
           }
         } else {
@@ -287,7 +288,7 @@ ValueImpacts.Context <- function(context,
         dynamic_mult <- lapply(dynamic_mult, unname)
       }
 
-      # Recovery delays prolong impacts # TODO - check dynamic ####
+      # Recovery delays prolong impacts
       if (incursion$get_type() %in% c("presence", "density", "area") &&
           is.list(attr(impact_incursion, "recovery_delay"))) {
         if (length(attr(impact_incursion, "recovery_delay")) >= id &&
@@ -330,6 +331,9 @@ ValueImpacts.Context <- function(context,
                   dynamic_incursion[[i]] <- max(
                     dynamic_incursion[[i]],
                     ((1 - prev_mult)*prev_incursions)[1:delay], na.rm = TRUE)
+                  if (dynamic_incursion[[i]] == 0) {
+                    dynamic_mult[[i]] <- 1
+                  }
                 }
               }
             } else if (delay > 0 && length(prev_incursions) > 0) {
@@ -368,7 +372,7 @@ ValueImpacts.Context <- function(context,
         disc_mult <- 1/(1 + discount_rates)^time_int
       }
 
-      # Calculate incursion impacts # TODO - update dynamic ####
+      # Calculate incursion impacts
       incursion_impacts <<- list()
       for (aspect in names(impact_layers)) {
         if (is_dynamic) {
