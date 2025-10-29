@@ -218,6 +218,11 @@ ValueImpacts.Context <- function(context,
          call. = FALSE)
   }
 
+  # Get dynamic indicator
+  self$get_is_dynamic <- function() {
+    return(is_dynamic)
+  }
+
   # Check discount rates
   if (!is.null(discount_rates) &&
       ((!is.numeric(discount_rates) || any(discount_rates < 0) ||
