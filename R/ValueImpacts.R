@@ -263,8 +263,6 @@ ValueImpacts.Context <- function(context,
             length(attr(impact_incursion, "dynamic_mult")) >= id &&
             is.list(attr(impact_incursion, "dynamic_mult")[[id]])) {
           dynamic_mult <- attr(impact_incursion, "dynamic_mult")[[id]]
-          attr(dynamic_mult, "incursion") <-
-            attr(attr(impact_incursion, "dynamic_mult"), "incursion")
         } else {
           dynamic_mult <- lapply(impact_layers, function(i) 1)
         }
@@ -284,6 +282,7 @@ ValueImpacts.Context <- function(context,
               }
             }
           }
+          attr(dynamic_mult, "incursion") <- incursion_area
         } else {
           for (aspect in names(impact_layers)) {
             dynamic_mult[[aspect]] <- dynamic_mult[[aspect]]*(
@@ -409,6 +408,9 @@ ValueImpacts.Context <- function(context,
 
     # Attach dynamic multipliers
     if (is_dynamic) {
+      if (is_dynamic && incursion$get_type() == "area") {
+        attr(dynamic_mult, "incursion") <- as.numeric(impact_incursion)
+      }
       attr(incursion_impacts, "dynamic_mult") <- dynamic_mult
     }
 

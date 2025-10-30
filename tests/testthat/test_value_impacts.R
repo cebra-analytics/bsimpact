@@ -490,6 +490,7 @@ test_that("applies implicit area-based dynamic impacts with recovery delay", {
   expect_silent(impacts$set_id(2))
   x <- 50
   expected_dynamic_mult <- list(aspect1 = 1 - 0.3, aspect2 = 1 - 0.4)
+  attr(expected_dynamic_mult, "incursion") <- 50
   expected_impacts <- list(aspect1 = 100*50*0.3, aspect2 = 200*50*0.4)
   attr(expected_impacts, "dynamic_mult") <- expected_dynamic_mult
   incursion$set_values(x) # 0
@@ -497,7 +498,6 @@ test_that("applies implicit area-based dynamic impacts with recovery delay", {
   expect_equal(calc_impacts, expected_impacts)
   expect_equal(attr(calc_impacts, "dynamic_mult"), expected_dynamic_mult)
   attr(x, "dynamic_mult") <- list(NULL, expected_dynamic_mult)
-  attr(attr(x, "dynamic_mult"), "incursion") <- 50
   attr(x, "recovery_delay") <- list(NULL, 2)
   attr(attr(x, "recovery_delay"), "incursions") <- 50
   attr(attr(x, "recovery_delay")[[2]], "dynamic_mult") <-
@@ -505,6 +505,7 @@ test_that("applies implicit area-based dynamic impacts with recovery delay", {
   x[1] <- 30
   incursion$set_values(x) # 1
   expected_dynamic_mult <- lapply(expected_dynamic_mult, function(a) a^2)
+  attr(expected_dynamic_mult, "incursion") <- 30
   expected_impacts <- list(aspect1 = 100*max(30*0.51, 50*0.3),
                            aspect2 = 200*max(30*0.64, 50*0.4))
   attr(expected_impacts, "dynamic_mult") <- expected_dynamic_mult
@@ -512,7 +513,6 @@ test_that("applies implicit area-based dynamic impacts with recovery delay", {
   expect_equal(calc_impacts, expected_impacts)
   expect_equal(attr(calc_impacts, "dynamic_mult"), expected_dynamic_mult)
   attr(x, "dynamic_mult")[[2]] <- expected_dynamic_mult
-  attr(attr(x, "dynamic_mult"), "incursion") <- 30
   attr(attr(x, "recovery_delay"), "incursions") <- c(30, 50)
   attr(attr(x, "recovery_delay")[[2]], "dynamic_mult") <-
     list(aspect1 = c(0.49, 0.7), aspect2 = c(0.36, 0.6))
@@ -520,6 +520,7 @@ test_that("applies implicit area-based dynamic impacts with recovery delay", {
   incursion$set_values(x) # 2
   expected_dynamic_mult <- list(aspect1 = (50 - 30*(1 - 0.49))*0.7/50,
                                 aspect2 = (50 - 30*(1 - 0.36))*0.6/50)
+  attr(expected_dynamic_mult, "incursion") <- 50
   expected_impacts <- list(aspect1 = 100*max(50*(1 - 0.4858), 30*0.51, 50*0.3),
                            aspect2 = 200*max(50*(1 - 0.3696), 30*0.64, 50*0.4))
   attr(expected_impacts, "dynamic_mult") <- expected_dynamic_mult
@@ -527,17 +528,17 @@ test_that("applies implicit area-based dynamic impacts with recovery delay", {
   expect_equal(calc_impacts, expected_impacts)
   expect_equal(attr(calc_impacts, "dynamic_mult"), expected_dynamic_mult)
   attr(x, "dynamic_mult")[[2]] <- expected_dynamic_mult
-  attr(attr(x, "dynamic_mult"), "incursion") <- 50
   attr(attr(x, "recovery_delay"), "incursions") <- c(50, 30, 50)
   attr(attr(x, "recovery_delay")[[2]], "dynamic_mult") <-
     list(aspect1 = c(0.4858, 0.49, 0.7), aspect2 = c(0.3696, 0.36, 0.6))
   x[1] <- 0
+  attr(expected_dynamic_mult, "incursion") <- 0
+  attr(expected_impacts, "dynamic_mult") <- expected_dynamic_mult
   incursion$set_values(x) # 3
   expect_silent(calc_impacts <- impacts$incursion_impacts(raw = TRUE))
   expect_equal(calc_impacts, expected_impacts)
   expect_equal(attr(calc_impacts, "dynamic_mult"), expected_dynamic_mult)
   attr(x, "dynamic_mult")[[2]] <- expected_dynamic_mult
-  attr(attr(x, "dynamic_mult"), "incursion") <- 0
   attr(attr(x, "recovery_delay"), "incursions") <- c(0, 50, 30, 50)
   attr(attr(x, "recovery_delay")[[2]], "dynamic_mult") <-
     list(aspect1 = c(0.4858, 0.4858, 0.49, 0.7),
@@ -547,13 +548,13 @@ test_that("applies implicit area-based dynamic impacts with recovery delay", {
   expect_equal(calc_impacts, expected_impacts)
   expect_equal(attr(calc_impacts, "dynamic_mult"), expected_dynamic_mult)
   attr(x, "dynamic_mult")[[2]] <- expected_dynamic_mult
-  attr(attr(x, "dynamic_mult"), "incursion") <- 0
   attr(attr(x, "recovery_delay"), "incursions") <- c(0, 0, 50, 30, 50)
   attr(attr(x, "recovery_delay")[[2]], "dynamic_mult") <-
     list(aspect1 = c(0.4858, 0.4858, 0.4858, 0.49, 0.7),
          aspect2 = c(0.3696, 0.3696, 0.3696, 0.36, 0.6))
   incursion$set_values(x) # 5
   expected_dynamic_mult <- list(aspect1 = 1, aspect2 = 1)
+  attr(expected_dynamic_mult, "incursion") <- 0
   expected_impacts <- list(aspect1 = 0, aspect2 = 0)
   attr(expected_impacts, "dynamic_mult") <- expected_dynamic_mult
   expect_silent(calc_impacts <- impacts$incursion_impacts(raw = TRUE))
